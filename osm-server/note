@@ -1,0 +1,5 @@
+import 1 seule fois:
+docker compose up osm-import
+
+Lancer serveur carte:
+docker compose up -d osm-server

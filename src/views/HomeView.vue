@@ -1,9 +1,18 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import OfflineMap from '../components/OfflineMap.vue'
 </script>
 
 <template>
   <main>
-    <TheWelcome />
+    <OfflineMap />
   </main>
 </template>
+
+<style scoped>
+main {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100%;
+}
+</style>
