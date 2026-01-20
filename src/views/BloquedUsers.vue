@@ -2,23 +2,22 @@
   <div class="blocked-users">
     <h2>Utilisateurs bloqués</h2>
 
-    <table v-if="users.length">
+
+    <table v-if="Array.isArray(users) && users.length > 0">
       <thead>
         <tr>
-          <th>ID</th>
           <th>Email</th>
-          <th>Tentatives</th>
-          <th>Bloqué le</th>
+          <th>Pseudo</th>
+          <th>Role</th>
           <th>Action</th>
         </tr>
       </thead>
 
       <tbody>
         <tr v-for="user in users" :key="user.id">
-          <td>{{ user.id }}</td>
           <td>{{ user.email }}</td>
-          <td>{{ user.nbrTentative }}</td>
-          <td>{{ formatDate(user.blockedAt) }}</td>
+          <td>{{ user.pseudo }}</td>
+          <td>{{ user.userRole.label }}</td>
           <td>
             <button @click="unblock(user.id)">
               Débloquer
@@ -46,8 +45,8 @@ export default {
 
   methods: {
     async loadUsers() {
-      const res = await getBlockedUsers();
-      this.users = res.data.data;
+      this.users = await getBlockedUsers();
+      console.log("USERS:", this.users);
     },
 
     async unblock(id) {

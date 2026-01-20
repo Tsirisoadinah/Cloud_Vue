@@ -92,6 +92,7 @@ const handleLogin = async () => {
     // Stockage
     localStorage.setItem('token', token)
     localStorage.setItem('expiresAt', expiresAt)
+    localStorage.setItem('role', res.data.role || 'utilisateur')
     // localStorage.setItem('user', JSON.stringify(res.data.user || {}))
 
     // Redirection après connexion

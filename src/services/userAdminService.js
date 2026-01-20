@@ -3,8 +3,9 @@ import api from "./api";
 /**
  * Récupérer les utilisateurs bloqués
  */
-export function getBlockedUsers() {
-  return api.get("/admin/users/blocked");
+export async function getBlockedUsers() {
+  const res = await api.get("/admin/users/blocked");
+  return res.data.data; //  retourne directement le tableau
 }
 
 /**

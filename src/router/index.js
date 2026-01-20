@@ -34,6 +34,11 @@ const router = createRouter({
       name: 'signup',
       component: () => import('../views/SignupView.vue'),
     },
+    {
+      path: '/blocked-users',
+      name: 'blocked-users',
+      component: () => import('../views/BloquedUsers.vue'),
+    },
   ],
 })
 
