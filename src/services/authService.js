@@ -12,7 +12,7 @@ export const login = async (email, password) => {
 export const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('expiresAt')
-  localStorage.removeItem('role') // si tu stockes aussi les infos user
+  localStorage.removeItem('role')
 }
 
 
