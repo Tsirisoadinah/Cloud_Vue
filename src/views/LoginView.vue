@@ -72,29 +72,38 @@ const rememberMe = ref(false)
 const loading = ref(false)
 const error = ref('')
 
+import { login } from '@/services/authService'
+
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
-    // TODO: Implémenter l'appel API vers le backend
-    console.log('Données de connexion:', formData.value)
+    const res = await login(formData.value.email, formData.value.password)
+    console.log(res);
     
-    // Simulation d'une connexion réussie (à remplacer par l'appel API réel)
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Stockage du token (à adapter selon votre backend)
-    // localStorage.setItem('token', response.token)
-    
-    // Exemple de redirection (à adapter selon vos besoins)
+    const token = res.data.token
+    const expiresAt = res.data.expiresAt
+
+    if (!token) {
+      throw new Error('Token manquant')
+    }
+
+    // Stockage
+    localStorage.setItem('token', token)
+    localStorage.setItem('expiresAt', expiresAt)
+    // localStorage.setItem('user', JSON.stringify(res.data.user || {}))
+
+    // Redirection après connexion
     router.push('/')
   } catch (err) {
-    error.value = 'Email ou mot de passe incorrect'
-    console.error('Erreur de connexion:', err)
+    console.log('Erreur login:', err.response || err)
+    error.value = err.response?.data?.message || err.message || 'Erreur de connexion'
   } finally {
     loading.value = false
   }
 }
+
 </script>
 
 <style scoped>

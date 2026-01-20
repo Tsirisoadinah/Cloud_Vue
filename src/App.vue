@@ -9,7 +9,7 @@
         <RouterLink to="/road-problems" class="nav-link">Problèmes Routiers</RouterLink>
         <RouterLink to="/about" class="nav-link">À propos</RouterLink>
         <RouterLink to="/login" class="nav-link">Connexion</RouterLink>
-        <RouterLink to="/signup" class="nav-link">Inscription</RouterLink>
+        <RouterLink to="/logout" class="nav-link">Se déconnecter</RouterLink>
       </div>
     </nav>
     <main class="main-content">
