@@ -5,7 +5,7 @@
         <h1>Connexion</h1>
         <p>Connectez-vous à votre compte</p>
       </div>
-      
+
       <form @submit.prevent="handleLogin" class="auth-form">
         <div class="form-group">
           <label for="email">Email</label>
@@ -18,7 +18,7 @@
             autocomplete="email"
           />
         </div>
-        
+
         <div class="form-group">
           <label for="password">Mot de passe</label>
           <input
@@ -30,7 +30,7 @@
             autocomplete="current-password"
           />
         </div>
-        
+
         <div class="form-options">
           <label class="checkbox-label">
             <input type="checkbox" v-model="rememberMe" />
@@ -38,17 +38,17 @@
           </label>
           <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         </div>
-        
+
         <button type="submit" class="btn-primary" :disabled="loading">
           <span v-if="!loading">Se connecter</span>
           <span v-else>Connexion en cours...</span>
         </button>
-        
+
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
       </form>
-      
+
       <div class="auth-footer">
         <p>Pas encore de compte ?</p>
         <RouterLink to="/signup" class="link-secondary">S'inscrire</RouterLink>
@@ -75,17 +75,17 @@ const error = ref('')
 const handleLogin = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
     // TODO: Implémenter l'appel API vers le backend
     console.log('Données de connexion:', formData.value)
-    
+
     // Simulation d'une connexion réussie (à remplacer par l'appel API réel)
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     // Stockage du token (à adapter selon votre backend)
     // localStorage.setItem('token', response.token)
-    
+
     // Exemple de redirection (à adapter selon vos besoins)
     router.push('/')
   } catch (err) {
@@ -273,7 +273,7 @@ const handleLogin = async () => {
   .auth-card {
     padding: 30px 20px;
   }
-  
+
   .form-options {
     flex-direction: column;
     gap: 10px;
