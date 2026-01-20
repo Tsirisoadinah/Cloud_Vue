@@ -3,9 +3,8 @@
     <div class="auth-card">
       <div class="auth-header">
         <h1>Créer un compte</h1>
-        <p>Rejoignez CarteMada dès maintenant</p>
       </div>
-      
+
       <form @submit.prevent="handleSignup" class="auth-form">
         <div class="form-group">
           <label for="email">Email</label>
@@ -18,7 +17,7 @@
             autocomplete="email"
           />
         </div>
-        
+
         <div class="form-group">
           <label for="pseudo">Pseudo</label>
           <input
@@ -31,7 +30,7 @@
             minlength="3"
           />
         </div>
-        
+
         <div class="form-group">
           <label for="password">Mot de passe</label>
           <input
@@ -45,7 +44,7 @@
           />
           <span class="input-hint">Minimum 6 caractères</span>
         </div>
-        
+
         <div class="form-group">
           <label for="confirmPassword">Confirmer le mot de passe</label>
           <input
@@ -57,28 +56,33 @@
             autocomplete="new-password"
           />
         </div>
-        
+
         <div class="checkbox-group">
           <label class="checkbox-label">
             <input type="checkbox" v-model="acceptTerms" required />
             <span>J'accepte les <a href="#" class="link-inline">conditions d'utilisation</a></span>
           </label>
         </div>
-        
+
         <button type="submit" class="btn-primary" :disabled="loading || !isFormValid">
           <span v-if="!loading">S'inscrire</span>
           <span v-else>Inscription en cours...</span>
         </button>
-        
+
+        <button type="button" class="btn-sync" @click="handleSyncUser" :disabled="syncLoading">
+          <span v-if="!syncLoading">Synchroniser user</span>
+          <span v-else>Synchronisation...</span>
+        </button>
+
         <div v-if="error" class="error-message">
           {{ error }}
         </div>
-        
+
         <div v-if="success" class="success-message">
           {{ success }}
         </div>
       </form>
-      
+
       <div class="auth-footer">
         <p>Vous avez déjà un compte ?</p>
         <RouterLink to="/login" class="link-secondary">Se connecter</RouterLink>
@@ -103,6 +107,7 @@ const formData = ref({
 
 const acceptTerms = ref(false)
 const loading = ref(false)
+const syncLoading = ref(false)
 const error = ref('')
 const success = ref('')
 
@@ -152,6 +157,32 @@ const handleSignup = async () => {
       'Erreur lors de l’inscription'
   } finally {
     loading.value = false
+  }
+}
+
+const handleSyncUser = async () => {
+  error.value = ''
+  success.value = ''
+  syncLoading.value = true
+
+  try {
+    // TODO: Implémenter l'appel au webservice de synchronisation
+    console.log('Synchronisation user en cours...')
+    
+    // Simulation d'un appel webservice (à remplacer par l'appel API réel)
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    success.value = 'Synchronisation utilisateur réussie !'
+    
+    // Effacer le message de succès après 3 secondes
+    setTimeout(() => {
+      success.value = ''
+    }, 3000)
+  } catch (err) {
+    error.value = 'Erreur lors de la synchronisation utilisateur'
+    console.error('Erreur de synchronisation:', err)
+  } finally {
+    syncLoading.value = false
   }
 }
 </script>
@@ -295,6 +326,33 @@ const handleSignup = async () => {
 }
 
 .btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-sync {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 10px;
+}
+
+.btn-sync:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(40, 167, 69, 0.4);
+}
+
+.btn-sync:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-sync:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }
