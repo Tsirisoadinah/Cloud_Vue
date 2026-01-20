@@ -8,6 +8,8 @@
         <RouterLink to="/" class="nav-link">Accueil</RouterLink>
         <RouterLink to="/road-problems" class="nav-link">Problèmes Routiers</RouterLink>
         <RouterLink to="/about" class="nav-link">À propos</RouterLink>
+        <RouterLink to="/login" class="nav-link">Connexion</RouterLink>
+        <RouterLink to="/signup" class="nav-link">Inscription</RouterLink>
       </div>
     </nav>
     <main class="main-content">
@@ -39,8 +41,10 @@ body, html {
 
 #app {
   height: 100vh;
+  width: 100vw;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .navbar {
@@ -53,6 +57,7 @@ body, html {
   height: 60px;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   z-index: 1000;
+  flex-shrink: 0;
 }
 
 .nav-brand h2 {
@@ -83,6 +88,8 @@ body, html {
 
 .main-content {
   flex: 1;
-  overflow: hidden;
+  width: 100%;
+  height: calc(100vh - 60px);
+  overflow: auto;
 }
 </style>
