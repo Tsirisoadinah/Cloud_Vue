@@ -171,12 +171,12 @@ const handleSyncUser = async () => {
   try {
     // TODO: Implémenter l'appel au webservice de synchronisation
     console.log('Synchronisation user en cours...')
-    
+
     // Simulation d'un appel webservice (à remplacer par l'appel API réel)
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
+
     success.value = 'Synchronisation utilisateur réussie !'
-    
+
     // Effacer le message de succès après 3 secondes
     setTimeout(() => {
       success.value = ''
