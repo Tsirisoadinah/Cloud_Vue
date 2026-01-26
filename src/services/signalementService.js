@@ -8,3 +8,7 @@ export async function getSignalements() {
 export function assignEntreprise(id, data) {
   return api.put(`/signalements/${id}/assign`, data);
 }
+
+export function updateSignalementStatus(id, data) {
+  return api.put(`/admin/route-status/change/${id}`, data);
+}

@@ -27,63 +27,114 @@
       @mouseenter="keepTooltipOpen"
       @mouseleave="scheduleTooltipClose"
     >
-      <div class="tooltip-close" @click="closeTooltip">×</div>
-      
-      <p>
-        <strong>Statut :</strong>
-        <span :class="`status-badge status-${hoveredProblem.status}`">
-          {{ hoveredProblem.status }}
-        </span>
-      </p>
-
-      <p><strong>Description :</strong></p>
-      <p>{{ hoveredProblem.description }}</p>
-
-      <p><strong>Surface :</strong> {{ hoveredProblem.surface }} m²</p>
-
-      <hr />
-
-      <div v-if="!hoveredProblem.entrepriseId">
-        <!-- Formulaire d'assignation (uniquement pour les managers) -->
-        <div v-if="isManager()">
-          <label>Entreprise :</label>
-          <select v-model="selectedEntreprise">
-            <option disabled value="">Choisir</option>
-            <option v-for="e in entreprises" :key="e.id" :value="e.id">
-              {{ e.label }}
-            </option>
-          </select>
-
-          <!-- Budget -->
-          <label>Budget :</label>
-          <input
-            type="number"
-            v-model="budget"
-            placeholder="Budget en MGA"
-          />
-
-          <button
-            :disabled="loadingAssignation"
-            @click="assigner"
-          >
-            {{ loadingAssignation ? 'Assignation...' : 'Assigner' }}
-          </button>
-        </div>
-
-        <!-- Message pour les non-managers -->
-        <div v-else class="no-permission">
-          <p>⚠️ Seuls les managers peuvent assigner des entreprises.</p>
-        </div>
+      <div class="tooltip-header">
+        <h3>Signalement #{{ hoveredProblem.id }}</h3>
+        <div class="tooltip-close" @click="closeTooltip">×</div>
       </div>
+      
+      <div class="tooltip-body">
+        <div class="info-row">
+          <span class="info-label">Statut :</span>
+          <span :class="`status-badge status-${hoveredProblem.status.replace(' ', '-')}`">
+            {{ hoveredProblem.status }}
+          </span>
+        </div>
 
-      <div v-else class="already-assigned">
-        <p><strong>✓ Entreprise assignée</strong></p>
-        <div class="assigned-info">
-          <p><strong>Entreprise :</strong></p>
-          <p class="info-value">{{ hoveredProblem.entrepriseName || 'Non spécifié' }}</p>
+        <div class="info-row">
+          <span class="info-label">Description :</span>
+          <p class="info-text">{{ hoveredProblem.description || 'Aucune description' }}</p>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">Surface :</span>
+          <span class="info-value">{{ hoveredProblem.surface }} m²</span>
+        </div>
+
+        <hr />
+
+        <!-- Section assignation entreprise -->
+        <div v-if="!hoveredProblem.entrepriseId">
+          <h4>Assignation</h4>
           
-          <p><strong>Budget :</strong></p>
-          <p class="info-value">{{ formatBudget(hoveredProblem.budget) }} MGA</p>
+          <div v-if="isManager()">
+            <label>Entreprise :</label>
+            <select v-model="selectedEntreprise">
+              <option disabled value="">Choisir une entreprise</option>
+              <option v-for="e in entreprises" :key="e.id" :value="e.id">
+                {{ e.label }}
+              </option>
+            </select>
+
+            <label>Budget (MGA) :</label>
+            <input
+              type="number"
+              v-model="budget"
+              placeholder="Entrez le budget"
+            />
+
+            <button
+              class="btn-primary"
+              :disabled="loadingAssignation || !selectedEntreprise || !budget"
+              @click="assigner"
+            >
+              {{ loadingAssignation ? 'Assignation...' : '✓ Assigner' }}
+            </button>
+          </div>
+
+          <div v-else class="no-permission">
+            <p>⚠️ Seuls les managers peuvent assigner des entreprises</p>
+          </div>
+        </div>
+
+        <!-- Entreprise déjà assignée -->
+        <div v-else class="already-assigned">
+          <h4>✓ Assignation</h4>
+          <div class="assigned-content">
+            <div class="info-row">
+              <span class="info-label">Entreprise :</span>
+              <span class="info-value">{{ hoveredProblem.entrepriseName || 'Non spécifié' }}</span>
+            </div>
+            
+            <div class="info-row">
+              <span class="info-label">Budget :</span>
+              <span class="info-value">{{ formatBudget(hoveredProblem.budget) }} MGA</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section modification statut (Manager uniquement) -->
+        <div v-if="isManager()" class="status-section">
+          <hr />
+          <h4>Modifier le statut</h4>
+          
+          <div v-if="!showStatusModal">
+            <button class="btn-secondary" @click="toggleStatusModal">
+              🔄 Changer le statut
+            </button>
+          </div>
+
+          <div v-else class="status-form">
+            <label>Nouveau statut :</label>
+            <select v-model="selectedStatus">
+              <option disabled value="">Sélectionner un statut</option>
+              <option v-for="status in statusList" :key="status.id" :value="status.id">
+                {{ status.label }}
+              </option>
+            </select>
+
+            <div class="button-group">
+              <button
+                class="btn-success"
+                :disabled="loadingStatusUpdate || !selectedStatus"
+                @click="updateStatus"
+              >
+                {{ loadingStatusUpdate ? 'Mise à jour...' : '✓ Valider' }}
+              </button>
+              <button class="btn-cancel" @click="toggleStatusModal">
+                Annuler
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -93,8 +144,9 @@
 <script>
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { getSignalements, assignEntreprise } from "@/services/signalementService";
+import { getSignalements, assignEntreprise, updateSignalementStatus } from "@/services/signalementService";
 import { getEntreprises } from "@/services/entrepriseService";
+import { getStatus } from "@/services/statusService";
 
 export default {
   name: 'RoadProblemsView',
@@ -107,12 +159,16 @@ export default {
       tooltipPosition: { x: 0, y: 0 },
       roadProblems: [],
       entreprises: [],
+      statusList: [],
       selectedEntreprise: null,
+      selectedStatus: null,
       budget: null,
       loadingAssignation: false,
+      loadingStatusUpdate: false,
       closeTimeout: null,
       tooltipLocked: false,
-      userRole: null
+      userRole: null,
+      showStatusModal: false
     }
   },
 
@@ -121,7 +177,8 @@ export default {
     this.initMap();
     await Promise.all([
       this.loadSignalements(),
-      this.loadEntreprises()
+      this.loadEntreprises(),
+      this.loadStatus()
     ]);
     this.addProblemsToMap();
   },
@@ -182,6 +239,15 @@ export default {
       this.entreprises = res.data;
     },
 
+    async loadStatus() {
+      try {
+        this.statusList = await getStatus();
+        console.log('✅ Statuts chargés:', this.statusList.length);
+      } catch (e) {
+        console.error("Erreur chargement statuts", e);
+      }
+    },
+
     async assigner() {
       if (!this.selectedEntreprise || !this.budget) {
         alert("Entreprise et budget requis");
@@ -196,7 +262,7 @@ export default {
           budget: this.budget
         });
 
-        alert("Signalement assigné avec succès");
+        alert("✓ Signalement assigné avec succès");
 
         // reset
         this.selectedEntreprise = null;
@@ -204,16 +270,73 @@ export default {
         
         // Recharger les données
         await this.loadSignalements();
+        this.clearMarkers();
+        this.addProblemsToMap();
         
         // Fermer le tooltip
         this.closeTooltip();
 
       } catch (e) {
         console.error(e);
-        alert("Erreur lors de l'assignation");
+        alert("❌ Erreur lors de l'assignation");
       } finally {
         this.loadingAssignation = false;
       }
+    },
+
+    async updateStatus() {
+      if (!this.selectedStatus) {
+        alert("Veuillez sélectionner un statut");
+        return;
+      }
+
+      try {
+        this.loadingStatusUpdate = true;
+
+        // L'API attend probablement juste l'ID du statut directement
+        // await updateSignalementStatus(this.hoveredProblem.id, this.selectedStatus);
+        await updateSignalementStatus(this.hoveredProblem.id, {
+          routeStatusId: this.selectedStatus
+        });
+
+        alert("✓ Statut mis à jour avec succès");
+
+        // reset
+        this.selectedStatus = null;
+        this.showStatusModal = false;
+        
+        // Recharger les données
+        await this.loadSignalements();
+        this.clearMarkers();
+        this.addProblemsToMap();
+        
+        // Fermer le tooltip
+        this.closeTooltip();
+
+      } catch (e) {
+        console.error("Erreur complète:", e);
+        console.error("Données envoyées:", {
+          signalementId: this.hoveredProblem.id,
+          statusId: this.selectedStatus
+        });
+        alert("❌ Erreur lors de la mise à jour du statut: " + (e.response?.data?.message || e.message));
+      } finally {
+        this.loadingStatusUpdate = false;
+      }
+    },
+
+    toggleStatusModal() {
+      this.showStatusModal = !this.showStatusModal;
+      if (this.showStatusModal) {
+        this.selectedStatus = null;
+      }
+    },
+
+    clearMarkers() {
+      this.markers.forEach(marker => {
+        this.map.removeLayer(marker);
+      });
+      this.markers = [];
     },
 
     initMap() {
