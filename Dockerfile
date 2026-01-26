@@ -1,10 +1,20 @@
-FROM maven:3.8.5-openjdk-17 AS build
-WORKDIR /app
-COPY . .
-RUN mvn clean package -DskipTests
+# Étape 1 : Utiliser Node 22 pour le dev
+FROM node:22-alpine
 
-FROM openjdk:17.0.1-jdk-slim
+# Définir le dossier de travail
 WORKDIR /app
-COPY --from=build /app/target/rest-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+# Copier uniquement les fichiers de dépendances
+COPY package*.json ./
+
+# Installer les dépendances
+RUN npm install
+
+# Copier le reste du code source
+COPY . .
+
+# Exposer le port de développement Vite (5173 par défaut)
+EXPOSE 5173
+
+# Démarrer le serveur de développement
+CMD ["npm", "run", "dev"]
