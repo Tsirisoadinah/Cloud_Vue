@@ -1,138 +1,373 @@
 <template>
   <div class="home">
-    <div class="hero-section">
-      <div class="hero-content">
-        <h1>🗺️ CarteMada</h1>
-        <h2>Système de Gestion des Problèmes Routiers</h2>
-        <p>Visualisez et suivez les problèmes d'infrastructure routière à Madagascar</p>
-
-        <div class="features">
-          <div class="feature-card">
-            <div class="feature-icon">📍</div>
-            <h3>Localisation Précise</h3>
-            <p>Identifiez les problèmes routiers sur une carte interactive</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">📊</div>
-            <h3>Suivi en Temps Réel</h3>
-            <p>Suivez le statut des réparations (nouveau, en cours, terminé)</p>
-          </div>
-
-          <div class="feature-card">
-            <div class="feature-icon">💰</div>
-            <h3>Gestion Budgétaire</h3>
-            <p>Consultez les budgets alloués et les entreprises responsables</p>
-          </div>
-        </div>
-
-        <div class="cta-buttons">
-          <RouterLink to="/road-problems" class="btn btn-primary">
-            Voir la Carte des Problèmes
-          </RouterLink>
-          <RouterLink to="/about" class="btn btn-secondary">
-            En Savoir Plus
-          </RouterLink>
-        </div>
-      </div>
+    <!-- Loading State -->
+    <div v-if="isLoading" class="loading-overlay">
+      <div class="spinner"></div>
+      <p>Chargement...</p>
     </div>
 
-    <div class="stats-section">
-      <div class="stats-container">
-        <div class="stat-item">
-          <div class="stat-number">6</div>
-          <div class="stat-label">Problèmes Signalés</div>
+    <!-- Error State -->
+    <div v-else-if="error" class="error-overlay">
+      <p class="error-message">{{ error }}</p>
+      <button @click="loadSignalements" class="btn-retry">Réessayer</button>
+    </div>
+
+    <!-- Main Content -->
+    <div v-else>
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-background"></div>
+        <div class="hero-content">
+          <h1 class="hero-title">🗺️ CarteMada</h1>
+          <h2 class="hero-subtitle">Système de Gestion des Problèmes Routiers</h2>
+          <p class="hero-description">Visualisez et suivez les problèmes d'infrastructure routière à Madagascar</p>
+
+          <div class="features">
+            <div class="feature-card">
+              <div class="feature-icon">📍</div>
+              <h3>Localisation Précise</h3>
+              <p>Identifiez les problèmes routiers sur une carte interactive</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">📊</div>
+              <h3>Suivi en Temps Réel</h3>
+              <p>Suivez le statut des réparations (nouveau, en cours, terminé)</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="feature-icon">💰</div>
+              <h3>Gestion Budgétaire</h3>
+              <p>Consultez les budgets alloués et les entreprises responsables</p>
+            </div>
+          </div>
+
+          <div class="cta-buttons">
+            <RouterLink to="/road-problems" class="btn btn-primary">
+              <span class="btn-icon">📍</span>
+              Voir la Carte
+            </RouterLink>
+            <RouterLink to="/about" class="btn btn-secondary">
+              <span class="btn-icon">📊</span>
+              Tableau de Bord
+            </RouterLink>
+          </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">2</div>
-          <div class="stat-label">En Cours de Réparation</div>
+      </section>
+
+      <!-- Stats Section -->
+      <section class="stats-section">
+        <div class="stats-container">
+          <div class="stat-card">
+            <div class="stat-icon">📍</div>
+            <div class="stat-number">{{ totalProblems }}</div>
+            <div class="stat-label">Problèmes Signalés</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-number">{{ statusCounts['en-cours'] || 0 }}</div>
+            <div class="stat-label">En Cours de Réparation</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-number">{{ statusCounts.termine || 0 }}</div>
+            <div class="stat-label">Problèmes Résolus</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💼</div>
+            <div class="stat-number">{{ statusCounts.nouveau || 0 }}</div>
+            <div class="stat-label">Nouveaux Signalements</div>
+          </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">2</div>
-          <div class="stat-label">Problèmes Résolus</div>
+      </section>
+
+      <!-- Summary Section -->
+      <section class="summary-section">
+        <div class="summary-container">
+          <h2>Récapitulatif Financier</h2>
+          <div class="summary-grid">
+            <div class="summary-item budget">
+              <div class="summary-label">Budget Total</div>
+              <div class="summary-value">{{ formatCurrency(totalBudget) }}</div>
+            </div>
+            <div class="summary-item surface">
+              <div class="summary-label">Surface Totale à Traiter</div>
+              <div class="summary-value">{{ totalSurface }} m²</div>
+            </div>
+            <div class="summary-item progress">
+              <div class="summary-label">Taux de Complétion</div>
+              <div class="summary-value">{{ completionRate }}%</div>
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" :style="{ width: completionRate + '%' }"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="stat-item">
-          <div class="stat-number">413k</div>
-          <div class="stat-label">Budget Total (MGA)</div>
+      </section>
+
+      <!-- Quick Access Section -->
+      <section class="quick-access-section">
+        <div class="quick-access-container">
+          <h2>Accès Rapide</h2>
+          <div class="quick-access-grid">
+            <RouterLink to="/road-problems" class="quick-access-card">
+              <div class="card-icon">🗺️</div>
+              <h3>Consulter la Carte</h3>
+              <p>Visualiser tous les problèmes routiers</p>
+              <div class="card-arrow">→</div>
+            </RouterLink>
+            <RouterLink to="/about" class="quick-access-card">
+              <div class="card-icon">📈</div>
+              <h3>Voir les Statistiques</h3>
+              <p>Analyse détaillée des signalements</p>
+              <div class="card-arrow">→</div>
+            </RouterLink>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
   </div>
 </template>
 
 <script>
+import { getSignalements } from "@/services/signalementService";
+
 export default {
-  name: 'HomeView'
+  name: 'HomeView',
+
+  data() {
+    return {
+      roadProblems: [],
+      isLoading: true,
+      error: null
+    }
+  },
+
+  async mounted() {
+    await this.loadSignalements()
+  },
+
+  methods: {
+    async loadSignalements() {
+      try {
+        this.isLoading = true
+        this.error = null
+        const data = await getSignalements()
+
+        this.roadProblems = data.map(s => ({
+          id: s.id,
+          type: s.problemeDescription || 'Non spécifié',
+          lat: s.latitude,
+          lng: s.longitude,
+          date: s.dateSignalement || new Date().toISOString().split('T')[0],
+          status: s.routeStatusName?.toLowerCase().replace(/\s+/g, '-') || 'nouveau',
+          surface: s.surface || 0,
+          budget: s.budget || 0,
+          entreprise: s.routeEntrepriseName || 'Non assignée'
+        }))
+
+        console.log(`✅ ${this.roadProblems.length} signalements chargés`)
+      } catch (err) {
+        console.error('❌ Erreur lors du chargement des signalements:', err)
+        this.error = 'Impossible de charger les données. Veuillez réessayer.'
+        this.roadProblems = []
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    formatCurrency(amount) {
+      return new Intl.NumberFormat('fr-FR', {
+        style: 'currency',
+        currency: 'MGA',
+        minimumFractionDigits: 0
+      }).format(amount)
+    }
+  },
+
+  computed: {
+    totalProblems() {
+      return this.roadProblems.length
+    },
+
+    totalBudget() {
+      return this.roadProblems.reduce((sum, problem) => sum + problem.budget, 0)
+    },
+
+    totalSurface() {
+      return this.roadProblems.reduce((sum, problem) => sum + problem.surface, 0).toFixed(1)
+    },
+
+    statusCounts() {
+      return this.roadProblems.reduce((counts, problem) => {
+        counts[problem.status] = (counts[problem.status] || 0) + 1
+        return counts
+      }, {})
+    },
+
+    completionRate() {
+      if (this.totalProblems === 0) return 0
+      const completed = this.statusCounts.termine || 0
+      return Math.round((completed / this.totalProblems) * 100)
+    }
+  }
 }
 </script>
 
 <style scoped>
 .home {
-  min-height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100%;
+  min-height: 100vh;
+  background: #f8f9fa;
 }
 
-.hero-section {
-  padding: 80px 20px;
-  text-align: center;
+/* Loading & Error States */
+.loading-overlay,
+.error-overlay {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
+.spinner {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.error-message {
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.btn-retry {
+  padding: 12px 30px;
+  background: white;
+  color: #667eea;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-retry:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Hero Section */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.hero-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="rgba(255,255,255,0.1)" fill-opacity="1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+  background-size: cover;
+  opacity: 0.5;
+}
+
 .hero-content {
+  position: relative;
+  z-index: 2;
   max-width: 1200px;
   margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+  color: white;
+  width: 100%;
 }
 
-.hero-content h1 {
-  font-size: 3.5rem;
-  margin-bottom: 10px;
-  font-weight: 700;
+.hero-title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 800;
+  margin: 0 0 15px 0;
+  line-height: 1.1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-.hero-content h2 {
-  font-size: 2rem;
-  margin-bottom: 20px;
-  font-weight: 300;
+.hero-subtitle {
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 400;
+  margin: 0 0 20px 0;
+  opacity: 0.95;
+  line-height: 1.3;
+}
+
+.hero-description {
+  font-size: clamp(1rem, 3vw, 1.3rem);
+  margin: 0 0 50px 0;
   opacity: 0.9;
-}
-
-.hero-content p {
-  font-size: 1.2rem;
-  margin-bottom: 60px;
-  opacity: 0.8;
-}
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 60px;
-}
-
-.feature-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.feature-icon {
-  font-size: 3rem;
-  margin-bottom: 20px;
-}
-
-.feature-card h3 {
-  font-size: 1.5rem;
-  margin-bottom: 15px;
-  font-weight: 600;
-}
-
-.feature-card p {
-  opacity: 0.8;
   line-height: 1.6;
 }
 
+/* Features */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 25px;
+  margin-bottom: 50px;
+}
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 40px 30px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.feature-card:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.feature-icon {
+  font-size: 3.5rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.feature-card h3 {
+  font-size: 1.4rem;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+}
+
+.feature-card p {
+  margin: 0;
+  opacity: 0.95;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* CTA Buttons */
 .cta-buttons {
   display: flex;
   gap: 20px;
@@ -141,89 +376,430 @@ export default {
 }
 
 .btn {
-  padding: 15px 30px;
-  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 32px;
+  border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   transition: all 0.3s ease;
+  cursor: pointer;
+  border: none;
 }
 
 .btn-primary {
   background: #3498db;
   color: white;
+  box-shadow: 0 10px 25px rgba(52, 152, 219, 0.3);
 }
 
 .btn-primary:hover {
   background: #2980b9;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(52, 152, 219, 0.4);
 }
 
 .btn-secondary {
   background: transparent;
   color: white;
-  border: 2px solid white;
+  border: 2.5px solid white;
 }
 
 .btn-secondary:hover {
   background: white;
   color: #667eea;
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+  transform: translateY(-4px);
+  box-shadow: 0 15px 35px rgba(255, 255, 255, 0.2);
 }
 
+.btn-icon {
+  font-size: 1.3rem;
+}
+
+/* Stats Section */
 .stats-section {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 40px 20px;
+  background: white;
+  padding: 60px 20px;
+  box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.08);
 }
 
 .stats-container {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 30px;
-  text-align: center;
-  color: white;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 25px;
 }
 
-.stat-item {
-  padding: 20px;
+.stat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 35px 25px;
+  text-align: center;
+  color: white;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  display: block;
 }
 
 .stat-number {
-  font-size: 3rem;
-  font-weight: 700;
+  font-size: 2.8rem;
+  font-weight: 800;
   margin-bottom: 10px;
+  line-height: 1;
 }
 
 .stat-label {
-  font-size: 1.1rem;
+  font-size: 1rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* Summary Section */
+.summary-section {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8eef5 100%);
+  padding: 60px 20px;
+}
+
+.summary-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.summary-container h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin: 0 0 45px 0;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.summary-item {
+  background: white;
+  border-radius: 16px;
+  padding: 35px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.summary-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.summary-item.budget {
+  border-top: 4px solid #3498db;
+}
+
+.summary-item.surface {
+  border-top: 4px solid #2ecc71;
+}
+
+.summary-item.progress {
+  border-top: 4px solid #f39c12;
+}
+
+.summary-label {
+  font-size: 0.95rem;
+  color: #7f8c8d;
+  font-weight: 500;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.summary-value {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.progress-bar-container {
+  background: #ecf0f1;
+  height: 8px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  background: linear-gradient(90deg, #f39c12 0%, #e67e22 100%);
+  height: 100%;
+  border-radius: 10px;
+  transition: width 0.8s ease;
+}
+
+/* Quick Access Section */
+.quick-access-section {
+  background: white;
+  padding: 60px 20px;
+}
+
+.quick-access-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.quick-access-container h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin: 0 0 45px 0;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.quick-access-card {
+  position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  padding: 40px 35px;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+}
+
+.quick-access-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: left 0.3s ease;
+}
+
+.quick-access-card:hover::before {
+  left: 100%;
+}
+
+.quick-access-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 45px rgba(102, 126, 234, 0.3);
+}
+
+.card-icon {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  display: block;
+}
+
+.quick-access-card h3 {
+  font-size: 1.6rem;
+  margin: 0 0 10px 0;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.quick-access-card p {
+  margin: 0 0 20px 0;
+  opacity: 0.95;
+  font-size: 1rem;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.card-arrow {
+  font-size: 1.5rem;
   opacity: 0.8;
+  transition: transform 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.quick-access-card:hover .card-arrow {
+  transform: translateX(5px);
+  opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .hero-content {
+    padding: 30px 15px;
+  }
+
+  .stats-container,
+  .summary-grid,
+  .quick-access-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
-  .hero-content h1 {
-    font-size: 2.5rem;
+  .hero-title {
+    margin-bottom: 10px;
   }
 
-  .hero-content h2 {
-    font-size: 1.5rem;
+  .hero-description {
+    margin-bottom: 35px;
   }
 
   .features {
     grid-template-columns: 1fr;
+    gap: 15px;
+    margin-bottom: 35px;
+  }
+
+  .feature-card {
+    padding: 30px 20px;
   }
 
   .cta-buttons {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
   }
 
   .btn {
-    width: 250px;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .stats-container,
+  .summary-grid,
+  .quick-access-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-section,
+  .summary-section,
+  .quick-access-section {
+    padding: 40px 15px;
+  }
+
+  .stat-card {
+    padding: 25px 15px;
+  }
+
+  .stat-number {
+    font-size: 2.2rem;
+  }
+
+  .summary-container h2,
+  .quick-access-container h2 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+  }
+
+  .summary-value {
+    font-size: 1.8rem;
+  }
+
+  .quick-access-card {
+    padding: 30px 20px;
+  }
+
+  .quick-access-card h3 {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.3rem;
+  }
+
+  .hero-description {
+    font-size: 1rem;
+  }
+
+  .feature-card {
+    padding: 20px 15px;
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+  }
+
+  .feature-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .feature-card p {
+    font-size: 0.85rem;
+  }
+
+  .btn {
+    padding: 14px 24px;
+    font-size: 0.95rem;
+  }
+
+  .stat-card {
+    padding: 20px 12px;
+  }
+
+  .stat-icon {
+    font-size: 2rem;
+  }
+
+  .stat-number {
+    font-size: 1.8rem;
+  }
+
+  .stat-label {
+    font-size: 0.85rem;
+  }
+
+  .summary-item {
+    padding: 25px 20px;
+  }
+
+  .summary-label {
+    font-size: 0.85rem;
+  }
+
+  .summary-value {
+    font-size: 1.5rem;
+  }
+
+  .quick-access-card {
+    padding: 25px 15px;
+  }
+
+  .card-icon {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+  }
+
+  .quick-access-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+  }
+
+  .quick-access-card p {
+    font-size: 0.9rem;
+    margin-bottom: 15px;
   }
 }
 </style>
