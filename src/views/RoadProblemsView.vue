@@ -175,11 +175,18 @@ export default {
   async mounted() {
     this.getUserRole();
     this.initMap();
-    await Promise.all([
-      this.loadSignalements(),
-      this.loadEntreprises(),
-      this.loadStatus()
-    ]);
+    
+    // Charger les signalements en priorité (ne pas bloquer sur les autres)
+    await this.loadSignalements();
+    
+    // Charger entreprises et statuts en arrière-plan (optionnels)
+    this.loadEntreprises().catch(() => {
+      console.warn('⚠️ Impossible de charger les entreprises (accès restreint)');
+    });
+    this.loadStatus().catch(() => {
+      console.warn('⚠️ Impossible de charger les statuts (accès restreint)');
+    });
+    
     this.addProblemsToMap();
   },
 
@@ -235,8 +242,14 @@ export default {
     },
 
     async loadEntreprises() {
-      const res = await getEntreprises();
-      this.entreprises = res.data;
+      try {
+        const res = await getEntreprises();
+        this.entreprises = res.data || [];
+        console.log(`✅ ${this.entreprises.length} entreprises chargées`);
+      } catch (e) {
+        console.warn("⚠️ Impossible de charger les entreprises (accès restreint ou non authentifié)");
+        this.entreprises = [];
+      }
     },
 
     async loadStatus() {
@@ -244,7 +257,8 @@ export default {
         this.statusList = await getStatus();
         console.log('✅ Statuts chargés:', this.statusList.length);
       } catch (e) {
-        console.error("Erreur chargement statuts", e);
+        console.warn("⚠️ Impossible de charger les statuts (accès restreint ou non authentifié)");
+        this.statusList = [];
       }
     },
 
