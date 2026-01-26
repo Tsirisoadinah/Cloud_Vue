@@ -4,3 +4,7 @@ export async function getSignalements() {
   const res = await api.get("/signalements");
   return res.data.data; // tableau backend
 }
+
+export function assignEntreprise(id, data) {
+  return api.put(`/signalements/${id}/assign`, data);
+}
