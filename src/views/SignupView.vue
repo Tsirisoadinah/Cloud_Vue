@@ -94,6 +94,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { signup } from '@/services/authService'
 
 const router = useRouter()
 
@@ -125,7 +126,6 @@ const handleSignup = async () => {
   error.value = ''
   success.value = ''
 
-  // Validation du mot de passe
   if (formData.value.password !== formData.value.confirmPassword) {
     error.value = 'Les mots de passe ne correspondent pas'
     return
@@ -139,25 +139,22 @@ const handleSignup = async () => {
   loading.value = true
 
   try {
-    // TODO: Implémenter l'appel API vers le backend
-    console.log('Données d\'inscription:', {
+    await signup({
       email: formData.value.email,
       pseudo: formData.value.pseudo,
       password: formData.value.password
     })
 
-    // Simulation d'une inscription réussie (à remplacer par l'appel API réel)
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    success.value = 'Inscription réussie ! Redirection vers la connexion...'
 
-    success.value = 'Inscription réussie ! Redirection...'
-
-    // Exemple de redirection (à adapter selon vos besoins)
     setTimeout(() => {
-      router.push('/')
+      router.push('/login')
     }, 1500)
+
   } catch (err) {
-    error.value = 'Une erreur est survenue lors de l\'inscription'
-    console.error('Erreur d\'inscription:', err)
+    error.value =
+      err.response?.data?.message ||
+      'Erreur lors de l’inscription'
   } finally {
     loading.value = false
   }
@@ -189,6 +186,7 @@ const handleSyncUser = async () => {
   }
 }
 </script>
+
 
 <style scoped>
 .auth-container {

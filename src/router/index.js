@@ -25,9 +25,19 @@ const router = createRouter({
       component: () => import('../views/LoginView.vue'),
     },
     {
+      path: '/logout',
+      name: 'logout',
+      component: () => import('../views/LogoutView.vue'),
+    },
+    {
       path: '/signup',
       name: 'signup',
       component: () => import('../views/SignupView.vue'),
+    },
+    {
+      path: '/blocked-users',
+      name: 'blocked-users',
+      component: () => import('../views/BloquedUsers.vue'),
     },
   ],
 })
