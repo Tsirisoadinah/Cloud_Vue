@@ -34,6 +34,10 @@
             <i class="fas fa-ban link-icon"></i>
             Bloqués
           </RouterLink>
+          <RouterLink to="/users-list" class="nav-link auth-link">
+            <span class="link-icon">👥</span>
+            Users
+          </RouterLink>
           <button @click="handleSync" class="nav-link sync-button" :disabled="isSyncing">
             <i class="fas fa-sync link-icon" :class="{ 'fa-spin': isSyncing }"></i>
             {{ isSyncing ? 'Synchronisation...' : 'Synchroniser' }}

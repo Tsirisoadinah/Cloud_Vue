@@ -14,3 +14,15 @@ export async function getBlockedUsers() {
 export function unblockUser(userId) {
   return api.post(`/admin/users/${userId}/unblock`);
 }
+
+export function getAllUsers() {
+  return api.get("/admin/users");
+}
+
+export function getUsers() {
+  return api.get("/admin/users");
+}
+
+export function updateUser(userId, data) {
+  return api.put(`/admin/users/${userId}`, data);
+}

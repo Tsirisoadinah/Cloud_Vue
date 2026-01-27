@@ -39,6 +39,11 @@ const router = createRouter({
       name: 'blocked-users',
       component: () => import('../views/BloquedUsers.vue'),
     },
+    {
+      path: '/users-list',
+      name: 'users-list',
+      component: () => import('../views/UsersListView.vue'),
+    },
   ],
 })
 
