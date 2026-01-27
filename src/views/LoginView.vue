@@ -50,8 +50,8 @@
       </form>
 
       <div class="auth-footer">
-        <p>Pas encore de compte ?</p>
-        <RouterLink to="/signup" class="link-secondary">S'inscrire</RouterLink>
+        <p>Action pour un manager</p>
+        <RouterLink to="/signup" class="link-secondary">Créer un utilisateur</RouterLink>
       </div>
     </div>
   </div>

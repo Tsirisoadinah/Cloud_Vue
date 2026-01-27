@@ -5,7 +5,14 @@
         <h1>Créer un compte</h1>
       </div>
 
-      <form @submit.prevent="handleSignup" class="auth-form">
+      <div v-if="!hasToken" class="restriction-alert error">
+        <p>
+          ❌ <strong>Accès refusé</strong> - Vous devez être connecté pour créer un compte.
+        </p>
+        <RouterLink to="/login" class="btn-secondary">Aller à la connexion</RouterLink>
+      </div>
+
+      <form v-else @submit.prevent="handleSignup" class="auth-form">
         <div class="form-group">
           <label for="email">Email</label>
           <input
@@ -92,11 +99,13 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { signup } from '@/services/authService'
 
 const router = useRouter()
+
+const hasToken = ref(false)
 
 const formData = ref({
   email: '',
@@ -185,6 +194,12 @@ const handleSyncUser = async () => {
     syncLoading.value = false
   }
 }
+
+onMounted(() => {
+  // Vérifier la présence du token
+  const token = localStorage.getItem('token')
+  hasToken.value = !!token
+})
 </script>
 
 
@@ -223,6 +238,41 @@ const handleSyncUser = async () => {
 .auth-header {
   text-align: center;
   margin-bottom: 30px;
+}
+
+.restriction-alert {
+  background-color: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+  padding: 15px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.restriction-alert.error {
+  background-color: #f8d7da;
+  border: 2px solid #dc3545;
+  color: #721c24;
+}
+
+.restriction-alert p {
+  margin: 0 0 15px;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  padding: 10px 20px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
 }
 
 .auth-header h1 {
