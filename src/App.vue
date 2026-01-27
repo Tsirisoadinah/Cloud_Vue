@@ -34,9 +34,9 @@
             <span class="link-icon">🚫</span>
             Bloqués
           </RouterLink>
-          <button @click="handleSync" class="nav-link sync-button">
+          <button @click="handleSync" class="nav-link sync-button" :disabled="isSyncing">
             <span class="link-icon">🔄</span>
-            Synchroniser
+            {{ isSyncing ? 'Synchronisation...' : 'Synchroniser' }}
           </button>
         </div>
       </div>
@@ -76,7 +76,8 @@ export default {
 
   data() {
     return {
-      showLogoutModal: false
+      showLogoutModal: false,
+      isSyncing: false
     }
   },
 
@@ -102,8 +103,12 @@ export default {
     },
 
     handleSync() {
+      if (this.isSyncing) return;
+
+      this.isSyncing = true;
+
       // Appel de l'API de synchronisation Firebase
-      api.post('/admin/sync/firebase')
+      api.get('/admin/sync/firebase')
         .then(response => {
           console.log('Synchronisation réussie:', response.data);
           alert('Synchronisation Firebase réussie !');
@@ -111,6 +116,9 @@ export default {
         .catch(error => {
           console.error('Erreur lors de la synchronisation:', error);
           alert('Erreur lors de la synchronisation Firebase');
+        })
+        .finally(() => {
+          this.isSyncing = false;
         });
     }
   }
@@ -262,6 +270,16 @@ html, body {
 .sync-button:hover {
   background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
+}
+
+.sync-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.sync-button:disabled:hover {
+  background: none;
+  transform: none;
 }
 
 .sync-button .link-icon {
