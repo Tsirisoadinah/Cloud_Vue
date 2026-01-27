@@ -103,7 +103,7 @@ export default {
 
     handleSync() {
       // Appel de l'API de synchronisation Firebase
-      api.post('/admin/sync/firebase')
+      api.get('/admin/sync/firebase')
         .then(response => {
           console.log('Synchronisation réussie:', response.data);
           alert('Synchronisation Firebase réussie !');
