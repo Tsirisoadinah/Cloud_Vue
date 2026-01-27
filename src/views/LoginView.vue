@@ -32,11 +32,6 @@
         </div>
 
         <div class="form-options">
-          <label class="checkbox-label">
-            <input type="checkbox" v-model="rememberMe" />
-            <span>Se souvenir de moi</span>
-          </label>
-          <a href="#" class="forgot-password">Mot de passe oublié ?</a>
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading">
