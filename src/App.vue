@@ -34,6 +34,10 @@
             <span class="link-icon">🚫</span>
             Bloqués
           </RouterLink>
+          <button @click="handleSync" class="nav-link sync-button">
+            <span class="link-icon">🔄</span>
+            Synchroniser
+          </button>
         </div>
       </div>
     </nav>
@@ -67,32 +71,38 @@
 <script>
 export default {
   name: 'App',
-  
+
   data() {
     return {
       showLogoutModal: false
     }
   },
-  
+
   methods: {
     showLogoutConfirmation() {
       this.showLogoutModal = true;
     },
-    
+
     closeLogoutModal() {
       this.showLogoutModal = false;
     },
-    
+
     confirmLogout() {
       // Effacer les données de session
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Fermer la modal
       this.showLogoutModal = false;
-      
+
       // Rediriger vers la page de connexion
       this.$router.push('/login');
+    },
+
+    handleSync() {
+      // TODO: Appeler l'API de synchronisation ici
+      console.log('Synchronisation déclenchée - API à déterminer');
+      // Exemple: api.post('/sync').then(response => { ... })
     }
   }
 }
@@ -227,6 +237,31 @@ html, body {
 
 .auth-link:hover {
   opacity: 1;
+}
+
+.sync-button {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.sync-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.sync-button .link-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.sync-button:hover .link-icon {
+  transform: rotate(180deg);
 }
 
 /* Main Content */
@@ -417,7 +452,7 @@ html, body {
   .auth-link {
     display: none;
   }
-  
+
   .logout-link {
     display: flex !important;
   }
@@ -456,16 +491,16 @@ html, body {
   .link-icon {
     font-size: 1rem;
   }
-  
+
   .modal-content {
     width: 95%;
     max-width: 380px;
   }
-  
+
   .modal-header h3 {
     font-size: 1.1rem;
   }
-  
+
   .modal-body p {
     font-size: 1rem;
   }
@@ -504,13 +539,13 @@ html, body {
   .link-icon {
     display: none;
   }
-  
+
   .modal-header,
   .modal-body,
   .modal-footer {
     padding: 20px;
   }
-  
+
   .btn-cancel,
   .btn-confirm {
     padding: 10px 16px;
