@@ -31,18 +31,18 @@
         <h3>Signalement #{{ hoveredProblem.id }}</h3>
         <div class="tooltip-close" @click="closeTooltip">×</div>
       </div>
-      
+
       <div class="tooltip-body">
         <div class="info-row">
-          <span class="info-label">Statut :</span>
+          <span class="info-label">Statut : </span>
           <span :class="`status-badge status-${hoveredProblem.status.replace(' ', '-')}`">
             {{ hoveredProblem.status }}
           </span>
         </div>
 
         <div class="info-row">
-          <span class="info-label">Description :</span>
-          <p class="info-text">{{ hoveredProblem.description || 'Aucune description' }}</p>
+          <span class="info-label">Description : </span>
+          <span class="info-text">{{ hoveredProblem.description || 'Aucune description' }}</span>
         </div>
 
         <div class="info-row">
@@ -54,9 +54,9 @@
 
         <!-- Section assignation entreprise -->
         <div v-if="!hoveredProblem.entrepriseId">
-          <h4>Assignation</h4>
-          
           <div v-if="isManager()">
+            <h4>Assignation</h4>
+
             <label>Entreprise :</label>
             <select v-model="selectedEntreprise">
               <option disabled value="">Choisir une entreprise</option>
@@ -81,9 +81,9 @@
             </button>
           </div>
 
-          <div v-else class="no-permission">
+          <!-- <div v-else class="no-permission">
             <p>⚠️ Seuls les managers peuvent assigner des entreprises</p>
-          </div>
+          </div> -->
         </div>
 
         <!-- Entreprise déjà assignée -->
@@ -94,7 +94,7 @@
               <span class="info-label">Entreprise :</span>
               <span class="info-value">{{ hoveredProblem.entrepriseName || 'Non spécifié' }}</span>
             </div>
-            
+
             <div class="info-row">
               <span class="info-label">Budget :</span>
               <span class="info-value">{{ formatBudget(hoveredProblem.budget) }} MGA</span>
@@ -106,7 +106,7 @@
         <div v-if="isManager()" class="status-section">
           <hr />
           <h4>Modifier le statut</h4>
-          
+
           <div v-if="!showStatusModal">
             <button class="btn-secondary" @click="toggleStatusModal">
               🔄 Changer le statut
@@ -175,10 +175,10 @@ export default {
   async mounted() {
     this.getUserRole();
     this.initMap();
-    
+
     // Charger les signalements en priorité (ne pas bloquer sur les autres)
     await this.loadSignalements();
-    
+
     // Charger entreprises et statuts en arrière-plan (optionnels)
     this.loadEntreprises().catch(() => {
       console.warn('⚠️ Impossible de charger les entreprises (accès restreint)');
@@ -186,7 +186,7 @@ export default {
     this.loadStatus().catch(() => {
       console.warn('⚠️ Impossible de charger les statuts (accès restreint)');
     });
-    
+
     this.addProblemsToMap();
   },
 
@@ -281,12 +281,12 @@ export default {
         // reset
         this.selectedEntreprise = null;
         this.budget = null;
-        
+
         // Recharger les données
         await this.loadSignalements();
         this.clearMarkers();
         this.addProblemsToMap();
-        
+
         // Fermer le tooltip
         this.closeTooltip();
 
@@ -318,12 +318,12 @@ export default {
         // reset
         this.selectedStatus = null;
         this.showStatusModal = false;
-        
+
         // Recharger les données
         await this.loadSignalements();
         this.clearMarkers();
         this.addProblemsToMap();
-        
+
         // Fermer le tooltip
         this.closeTooltip();
 
@@ -367,7 +367,7 @@ export default {
 
     addProblemsToMap() {
       console.log(`📍 Ajout de ${this.roadProblems.length} marqueurs sur la carte`);
-      
+
       this.roadProblems.forEach((problem, index) => {
         // Vérification supplémentaire de sécurité
         if (!problem.lat || !problem.lng || isNaN(problem.lat) || isNaN(problem.lng)) {
@@ -386,7 +386,7 @@ export default {
 
         this.markers.push(marker);
       });
-      
+
       console.log(`✅ ${this.markers.length} marqueurs ajoutés avec succès`);
     },
 
@@ -409,7 +409,7 @@ export default {
         clearTimeout(this.closeTimeout);
         this.closeTimeout = null;
       }
-      
+
       this.hoveredProblem = problem;
       this.updateTooltipPosition(event);
     },
@@ -449,21 +449,21 @@ export default {
       const offsetY = 10;
       const mouseX = event.originalEvent.pageX;
       const mouseY = event.originalEvent.pageY;
-      
+
       // Dimensions estimées du tooltip
       const tooltipWidth = 320;
       const tooltipHeight = 400; // hauteur estimée maximale
-      
+
       // Dimensions de la fenêtre
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
-      
+
       // Position X : à droite de la souris, ou à gauche si pas assez d'espace
       let x = mouseX + offsetX;
       if (x + tooltipWidth > windowWidth) {
         x = mouseX - tooltipWidth - offsetX;
       }
-      
+
       // Position Y : en dessous de la souris, ou au-dessus si pas assez d'espace
       let y = mouseY + offsetY;
       if (y + tooltipHeight > windowHeight) {
