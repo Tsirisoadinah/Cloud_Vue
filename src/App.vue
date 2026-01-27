@@ -69,6 +69,8 @@
 </template>
 
 <script>
+import api from './services/api.js'
+
 export default {
   name: 'App',
 
@@ -100,9 +102,16 @@ export default {
     },
 
     handleSync() {
-      // TODO: Appeler l'API de synchronisation ici
-      console.log('Synchronisation déclenchée - API à déterminer');
-      // Exemple: api.post('/sync').then(response => { ... })
+      // Appel de l'API de synchronisation Firebase
+      api.post('/admin/sync/firebase')
+        .then(response => {
+          console.log('Synchronisation réussie:', response.data);
+          alert('Synchronisation Firebase réussie !');
+        })
+        .catch(error => {
+          console.error('Erreur lors de la synchronisation:', error);
+          alert('Erreur lors de la synchronisation Firebase');
+        });
     }
   }
 }
