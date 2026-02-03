@@ -22,23 +22,23 @@
             Tableau de Bord
           </RouterLink>
           <div class="nav-divider"></div>
-          <RouterLink to="/login" class="nav-link auth-link">
+          <RouterLink v-if="!isUserAuthenticated" to="/login" class="nav-link auth-link">
             <i class="fas fa-sign-in-alt link-icon"></i>
             Connexion
           </RouterLink>
-          <a @click.prevent="showLogoutConfirmation" class="nav-link auth-link logout-link">
+          <a v-if="isUserAdmin" @click.prevent="showLogoutConfirmation" class="nav-link auth-link logout-link">
             <i class="fas fa-sign-out-alt link-icon"></i>
             Déconnexion
           </a>
-          <RouterLink to="/blocked-users" class="nav-link auth-link">
+          <RouterLink v-if="isUserAdmin" to="/blocked-users" class="nav-link auth-link">
             <i class="fas fa-ban link-icon"></i>
             Bloqués
           </RouterLink>
-          <RouterLink to="/users-list" class="nav-link auth-link">
+          <RouterLink v-if="isUserAdmin" to="/users-list" class="nav-link auth-link">
             <span class="link-icon">👥</span>
             Users
           </RouterLink>
-          <button @click="handleSync" class="nav-link sync-button" :disabled="isSyncing">
+          <button v-if="isUserAdmin" @click="handleSync" class="nav-link sync-button" :disabled="isSyncing">
             <i class="fas fa-sync link-icon" :class="{ 'fa-spin': isSyncing }"></i>
             {{ isSyncing ? 'Synchronisation...' : 'Synchroniser' }}
           </button>
@@ -78,6 +78,7 @@
 
 <script>
 import api from './services/api.js'
+import { isAdmin, isAuthenticated } from './services/authService.js'
 
 export default {
   name: 'App',
@@ -86,6 +87,15 @@ export default {
     return {
       showLogoutModal: false,
       isSyncing: false
+    }
+  },
+
+  computed: {
+    isUserAdmin() {
+      return isAdmin()
+    },
+    isUserAuthenticated() {
+      return isAuthenticated()
     }
   },
 
