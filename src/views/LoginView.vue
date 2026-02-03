@@ -76,7 +76,7 @@ const handleLogin = async () => {
   try {
     const res = await login(formData.value.email, formData.value.password)
     console.log(res);
-    
+
     const token = res.data.token
     const expiresAt = res.data.expiresAt
 
@@ -89,6 +89,9 @@ const handleLogin = async () => {
     localStorage.setItem('expiresAt', expiresAt)
     localStorage.setItem('role', res.data.role || 'utilisateur')
     // localStorage.setItem('user', JSON.stringify(res.data.user || {}))
+
+    // Déclencher un événement pour notifier les composants
+    window.dispatchEvent(new Event('auth-state-changed'))
 
     // Redirection après connexion
     router.push('/')

@@ -86,20 +86,47 @@ export default {
   data() {
     return {
       showLogoutModal: false,
-      isSyncing: false
+      isSyncing: false,
+      // États réactifs pour l'authentification
+      userAuthenticated: false,
+      userIsAdmin: false
     }
   },
 
   computed: {
     isUserAdmin() {
-      return isAdmin()
+      return this.userIsAdmin
     },
     isUserAuthenticated() {
-      return isAuthenticated()
+      return this.userAuthenticated
     }
   },
 
+  mounted() {
+    // Initialiser l'état au montage du composant
+    this.updateAuthState()
+
+    // Écouter les changements de route pour mettre à jour l'état
+    this.$router.afterEach(() => {
+      this.updateAuthState()
+    })
+
+    // Écouter les événements personnalisés d'authentification
+    window.addEventListener('auth-state-changed', this.updateAuthState)
+  },
+
+  beforeUnmount() {
+    // Nettoyer l'écouteur d'événements
+    window.removeEventListener('auth-state-changed', this.updateAuthState)
+  },
+
   methods: {
+    // Méthode pour mettre à jour l'état d'authentification
+    updateAuthState() {
+      this.userAuthenticated = isAuthenticated()
+      this.userIsAdmin = isAdmin()
+    },
+
     showLogoutConfirmation() {
       this.showLogoutModal = true;
     },
@@ -112,6 +139,9 @@ export default {
       // Effacer les données de session
       localStorage.clear();
       sessionStorage.clear();
+
+      // Mettre à jour l'état réactif
+      this.updateAuthState()
 
       // Fermer la modal
       this.showLogoutModal = false;

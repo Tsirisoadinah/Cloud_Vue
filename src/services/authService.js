@@ -13,6 +13,9 @@ export const logout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('expiresAt')
   localStorage.removeItem('role')
+
+  // Déclencher un événement pour notifier les composants
+  window.dispatchEvent(new Event('auth-state-changed'))
 }
 
 
