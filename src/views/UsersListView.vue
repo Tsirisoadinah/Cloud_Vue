@@ -2,11 +2,12 @@
   <div class="users-container">
     <div class="page-header">
       <h1>👥 Gestion des utilisateurs</h1>
-      <button @click="loadUsers" class="btn-refresh">🔄 Actualiser</button>
+      <button class="btn-create" @click="$router.push('/signup')"> Créer un utilisateur</button>
+      <button @click="loadUsers" class="btn-refresh" >🔄 Actualiser</button>
     </div>
 
     <div v-if="!hasToken" class="restriction-alert">
-      <p>❌ Accès refusé - Vous devez être connecté pour accéder à la liste des utilisateurs.</p>
+      <p> Accès refusé - Vous devez être connecté pour accéder à la liste des utilisateurs.</p>
       <RouterLink to="/login" class="btn-login">Se connecter</RouterLink>
     </div>
 
@@ -36,8 +37,8 @@
               </span>
             </td>
             <td>
-              <button 
-                @click="openEditModal(user)" 
+              <button
+                @click="openEditModal(user)"
                 class="btn-edit"
               >
                 ✏️ Modifier
@@ -59,13 +60,13 @@
           <h3>✏️ Modifier l'utilisateur</h3>
           <button class="modal-close" @click="closeEditModal">×</button>
         </div>
-        
+
         <div class="modal-body">
           <div class="form-group">
             <label>Email</label>
-            <input 
-              type="email" 
-              v-model="editForm.email" 
+            <input
+              type="email"
+              v-model="editForm.email"
               placeholder="email@exemple.com"
               class="form-input"
             />
@@ -73,9 +74,9 @@
 
           <div class="form-group">
             <label>Pseudo</label>
-            <input 
-              type="text" 
-              v-model="editForm.pseudo" 
+            <input
+              type="text"
+              v-model="editForm.pseudo"
               placeholder="Nom d'utilisateur"
               class="form-input"
             />
@@ -95,8 +96,8 @@
           <button class="btn-cancel" @click="closeEditModal">
             Annuler
           </button>
-          <button 
-            class="btn-save" 
+          <button
+            class="btn-save"
             @click="saveUser"
             :disabled="isSaving"
           >
@@ -172,17 +173,17 @@ const saveUser = async () => {
 
   try {
     isSaving.value = true
-    
+
     await updateUserAPI(editForm.value.id, {
       email: editForm.value.email,
       pseudo: editForm.value.pseudo,
       userRoleId: editForm.value.userRoleId
     })
-    
+
     alert('✓ Utilisateur mis à jour avec succès')
     closeEditModal()
     await loadUsers()
-    
+
   } catch (err) {
     console.error('❌ Erreur mise à jour:', err)
     alert('Erreur lors de la mise à jour: ' + (err.response?.data?.message || err.message))
@@ -200,6 +201,23 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.btn-create {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-create:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
 .users-container {
   padding: 30px;
   max-width: 1400px;
