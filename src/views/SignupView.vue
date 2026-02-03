@@ -2,7 +2,7 @@
   <div class="auth-container">
     <div class="auth-card">
       <div class="auth-header">
-        <h1>Créer un compte</h1>
+        <h1>Créer un compte utilisateur</h1>
       </div>
 
       <div v-if="!hasToken" class="restriction-alert error">
@@ -72,13 +72,8 @@
         </div>
 
         <button type="submit" class="btn-primary" :disabled="loading || !isFormValid">
-          <span v-if="!loading">S'inscrire</span>
+          <span v-if="!loading">Inscrire l'utilisateur</span>
           <span v-else>Inscription en cours...</span>
-        </button>
-
-        <button type="button" class="btn-sync" @click="handleSyncUser" :disabled="syncLoading">
-          <span v-if="!syncLoading">Synchroniser user</span>
-          <span v-else>Synchronisation...</span>
         </button>
 
         <div v-if="error" class="error-message">
@@ -89,11 +84,6 @@
           {{ success }}
         </div>
       </form>
-
-      <div class="auth-footer">
-        <p>Vous avez déjà un compte ?</p>
-        <RouterLink to="/login" class="link-secondary">Se connecter</RouterLink>
-      </div>
     </div>
   </div>
 </template>
