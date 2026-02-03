@@ -230,11 +230,20 @@ export default {
       }, {})
     },
 
+    // completionRate() {
+    //   if (this.totalProblems === 0) return 0
+    //   const completed = this.statusCounts.termine || 0
+    //   return Math.round((completed / this.totalProblems) * 100)
+    // }
     completionRate() {
       if (this.totalProblems === 0) return 0
+
       const completed = this.statusCounts.termine || 0
-      return Math.round((completed / this.totalProblems) * 100)
+      const inProgress = (this.statusCounts['en-cours'] || 0) * 0.5
+
+      return Math.round(((completed + inProgress) / this.totalProblems) * 100)
     }
+
   }
 }
 </script>

@@ -44,6 +44,22 @@
   box-shadow: 0 1px 3px rgba(0,0,0,0.3);
 }
 
+.history-link {
+  margin-bottom: 10px;
+}
+
+.link-history {
+  font-size: 0.9rem;
+  color: #1e88e5;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.link-history:hover {
+  text-decoration: underline;
+}
+
+
 .status-nouveau {
   background-color: #ff4444;
 }

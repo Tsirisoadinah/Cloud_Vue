@@ -12,3 +12,7 @@ export function assignEntreprise(id, data) {
 export function updateSignalementStatus(id, data) {
   return api.put(`/admin/route-status/change/${id}`, data);
 }
+
+export function getHistoriqueStatus(id, params = {}) {
+  return api.get(`signalements/${id}/historique-status`, { params });
+}

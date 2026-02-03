@@ -44,6 +44,11 @@ const router = createRouter({
       name: 'users-list',
       component: () => import('../views/UsersListView.vue'),
     },
+    {
+      path: '/road-problems/:id/historique',
+      name: 'SignalementHistorique',
+      component: () => import('../views/SignalementHistoriqueView.vue')
+    }
   ],
 })
 

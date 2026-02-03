@@ -105,7 +105,17 @@
         <!-- Section modification statut (Manager uniquement) -->
         <div v-if="isManager()" class="status-section">
           <hr />
-          <h4>Modifier le statut</h4>
+          <h4>Gestion de statut</h4>
+
+          <!-- 🔎 Lien vers l’historique -->
+          <div class="history-link">
+            <RouterLink
+              :to="`/road-problems/${hoveredProblem.id}/historique`"
+              class="btn-secondary"
+            >
+              Voir l’historique des statuts
+            </RouterLink>
+          </div>
 
           <div v-if="!showStatusModal">
             <button class="btn-secondary" @click="toggleStatusModal">
