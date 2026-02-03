@@ -111,7 +111,6 @@
           <div class="history-link">
             <RouterLink
               :to="`/road-problems/${hoveredProblem.id}/historique`"
-              class="btn-secondary"
             >
               Voir l’historique des statuts
             </RouterLink>

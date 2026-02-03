@@ -45,18 +45,40 @@
 }
 
 .history-link {
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+  position: relative;
 }
 
-.link-history {
-  font-size: 0.9rem;
+.history-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
   color: #1e88e5;
   text-decoration: none;
   font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  transition: all 0.2s ease;
 }
 
-.link-history:hover {
-  text-decoration: underline;
+.history-link a::before {
+  content: "📋";
+  font-size: 16px;
+}
+
+.history-link a:hover {
+  background: #bbdefb;
+  border-color: #1e88e5;
+  text-decoration: none;
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(30, 136, 229, 0.2);
+}
+
+.history-link a:active {
+  transform: translateX(0);
 }
 
 
