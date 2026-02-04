@@ -7,7 +7,7 @@
 
       <div v-if="!hasToken" class="restriction-alert error">
         <p>
-          ❌ <strong>Accès refusé</strong> - Vous devez être connecté pour créer un compte.
+          <strong>Accès refusé</strong> - Vous devez être connecté pour créer un compte.
         </p>
         <RouterLink to="/login" class="btn-secondary">Aller à la connexion</RouterLink>
       </div>
