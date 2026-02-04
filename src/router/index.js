@@ -20,6 +20,11 @@ const router = createRouter({
       component: () => import('../views/RoadProblemsView.vue'),
     },
     {
+      path: '/signalement/:id/details',
+      name: 'signalement-details',
+      component: () => import('../views/SignalementDetailsView.vue'),
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('../views/LoginView.vue'),

@@ -237,3 +237,27 @@
   background: none;
   border: none;
 }
+
+/* Style pour le lien "voir les détails" */
+.details-link-section {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.btn-details {
+  display: inline-block;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.btn-details:hover {
+  background-color: #0056b3;
+  color: white;
+  text-decoration: none;
+}

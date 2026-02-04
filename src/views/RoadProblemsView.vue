@@ -50,6 +50,16 @@
           <span class="info-value">{{ hoveredProblem.surface }} m²</span>
         </div>
 
+        <div class="details-link-section">
+          <router-link
+            :to="`/signalement/${hoveredProblem.id}/details`"
+            class="btn-details"
+            @click="closeTooltip"
+          >
+            Voir les détails
+          </router-link>
+        </div>
+
         <hr />
 
         <!-- Section assignation entreprise -->
