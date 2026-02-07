@@ -16,3 +16,8 @@ export function updateSignalementStatus(id, data) {
 export function getHistoriqueStatus(id, params = {}) {
   return api.get(`signalements/${id}/historique-status`, { params });
 }
+
+export async function getRouteProblemeDashboard() {
+  const res = await api.get('/api/data/routeprobleme/dashboard');
+  return res.data.data;
+}

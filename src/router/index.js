@@ -15,14 +15,14 @@ const router = createRouter({
       component: () => import('../views/AboutView.vue'),
     },
     {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('../views/SignalementDetailsView.vue'),
+    },
+    {
       path: '/road-problems',
       name: 'road-problems',
       component: () => import('../views/RoadProblemsView.vue'),
-    },
-    {
-      path: '/signalement/:id/details',
-      name: 'signalement-details',
-      component: () => import('../views/SignalementDetailsView.vue'),
     },
     {
       path: '/login',

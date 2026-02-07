@@ -4,7 +4,7 @@
       <router-link to="/road-problems" class="back-link">
         ← Retour à la carte
       </router-link>
-      <h1>Signalement #{{ signalementId }}</h1>
+      <h1>Tableau de bord des signalements</h1>
     </div>
 
     <div class="content-grid">
@@ -52,7 +52,6 @@
               <tr
                 v-for="signalement in filteredSignalements"
                 :key="signalement.id"
-                :class="{ highlighted: signalement.id == signalementId }"
               >
                 <td>#{{ signalement.id }}</td>
                 <td>{{ signalement.description }}</td>
@@ -72,87 +71,112 @@
 </template>
 
 <script>
+import { getRouteProblemeDashboard } from '@/services/signalementService'
+
 export default {
   name: 'SignalementDetailsView',
 
   data() {
     return {
-      signalementId: null,
-      selectedStatus: 'signales',
-
-      // Données statiques pour l'instant
-      totalTraitementHeures: 156,
-      moyenneTraitementHeures: 24,
-
-      statusButtons: [
-        { key: 'signales', label: 'Signalés' },
-        { key: 'nouveau', label: 'Nouveau' },
-        { key: 'en-cours', label: 'En cours' },
-        { key: 'termine', label: 'Terminé' }
-      ],
-
-      // Données statiques des signalements
-      mockSignalements: [
-        {
-          id: 1,
-          description: 'Nids de poule sur la route principale',
-          surface: 15.5,
-          date: '2026-01-15',
-          status: 'nouveau'
-        },
-        {
-          id: 2,
-          description: 'Fissures importantes sur la chaussée',
-          surface: 32.0,
-          date: '2026-01-20',
-          status: 'en-cours'
-        },
-        {
-          id: 3,
-          description: 'Affaissement de la route',
-          surface: 8.2,
-          date: '2026-01-25',
-          status: 'termine'
-        },
-        {
-          id: 4,
-          description: 'Détérioration du revêtement',
-          surface: 45.8,
-          date: '2026-02-01',
-          status: 'signales'
-        },
-        {
-          id: 5,
-          description: 'Trous profonds après les pluies',
-          surface: 12.3,
-          date: '2026-02-02',
-          status: 'nouveau'
-        },
-        {
-          id: 6,
-          description: 'Problème de drainage',
-          surface: 28.7,
-          date: '2026-02-03',
-          status: 'en-cours'
-        }
-      ]
+      dashboard: null,
+      isLoading: true,
+      error: null,
+      selectedStatus: 'tous',
+      statusButtons: []
     }
   },
 
   computed: {
+    totalTraitementHeures() {
+      return this.formatHours(this.dashboard?.delaisMoyenGlobal)
+    },
+
+    moyenneTraitementHeures() {
+      const stats = this.dashboard?.statistiques || []
+      const values = stats.map(s => s.delaisMoyen).filter(v => v !== null && v !== undefined)
+      if (values.length === 0) return '0'
+      const avg = values.reduce((sum, v) => sum + v, 0) / values.length
+      return this.formatHours(avg)
+    },
+
+    allSignalements() {
+      if (!this.dashboard?.statistiques) return []
+      return this.dashboard.statistiques.flatMap(stat => {
+        const statusLabel = stat.status?.label || 'Inconnu'
+        const statusKey = this.normalizeStatus(statusLabel)
+        return (stat.problemeList || []).map(item => ({
+          id: item.routeProbleme?.id ?? item.id,
+          description: item.routeProbleme?.problemeDescription || 'Non spécifié',
+          surface: item.routeProbleme?.surface ?? 0,
+          date: item.dateHistorique
+            ? new Date(item.dateHistorique).toLocaleDateString('fr-FR')
+            : '—',
+          statusKey,
+          statusLabel
+        }))
+      })
+    },
+
     filteredSignalements() {
-      return this.mockSignalements.filter(s => s.status === this.selectedStatus);
+      if (this.selectedStatus === 'tous') return this.allSignalements
+      return this.allSignalements.filter(s => s.statusKey === this.selectedStatus)
     }
   },
 
-  mounted() {
-    this.signalementId = this.$route.params.id;
-    console.log('Détails du signalement #' + this.signalementId);
+  async mounted() {
+    await this.loadDashboard()
   },
 
   methods: {
+    async loadDashboard() {
+      try {
+        this.isLoading = true
+        this.error = null
+        const data = await getRouteProblemeDashboard()
+        this.dashboard = data
+        this.statusButtons = this.buildStatusButtons(data?.statistiques || [])
+      } catch (err) {
+        console.error('Erreur lors du chargement du dashboard:', err)
+        this.error = 'Impossible de charger les données. Veuillez réessayer.'
+        this.dashboard = null
+        this.statusButtons = []
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    buildStatusButtons(statistiques) {
+      const buttons = [
+        { key: 'tous', label: 'Tous' }
+      ]
+      statistiques.forEach(stat => {
+        const label = stat.status?.label || 'Inconnu'
+        const key = this.normalizeStatus(label)
+        if (!buttons.some(b => b.key === key)) {
+          buttons.push({ key, label })
+        }
+      })
+      return buttons
+    },
+
+    normalizeStatus(label) {
+      if (!label) return 'inconnu'
+      return label
+        .toString()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/\s+/g, '-')
+    },
+
+    formatHours(minutes) {
+      if (!minutes || Number.isNaN(Number(minutes))) return '0'
+      const hours = Number(minutes) / 60
+      return hours.toFixed(1)
+    },
+
     selectStatus(statusKey) {
-      this.selectedStatus = statusKey;
+      this.selectedStatus = statusKey
     }
   }
 }
