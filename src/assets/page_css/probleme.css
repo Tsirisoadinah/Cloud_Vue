@@ -116,17 +116,23 @@
 }
 
 .tooltip-header {
-  position: relative;
-  padding-right: 110px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tooltip-header h3 {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.2;
 }
 
 .tooltip-actions {
-  position: absolute;
-  top: 6px;
-  right: 10px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 }
 
 .photos-link {
