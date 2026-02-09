@@ -186,7 +186,8 @@ export default {
       closeTimeout: null,
       tooltipLocked: false,
       userRole: null,
-      showStatusModal: false
+      showStatusModal: false,
+      photos: []
     }
   },
 
@@ -196,6 +197,7 @@ export default {
 
     // Charger les signalements en priorité (ne pas bloquer sur les autres)
     await this.loadSignalements();
+
 
     // Charger entreprises et statuts en arrière-plan (optionnels)
     this.loadEntreprises().catch(() => {
@@ -256,6 +258,17 @@ export default {
 
       } catch (e) {
         console.error("Erreur chargement signalements", e);
+      }
+    },
+
+    async loadPhotos(signalementId) {
+      try {
+        const res = await getPhotosBySignalement(signalementId);
+        this.photos = res.data.data || [];
+        console.log(`✅ ${this.photos.length} photos chargées pour le signalement #${signalementId}`);
+      } catch (e) {
+        console.warn(`⚠️ Impossible de charger les photos pour le signalement #${signalementId}`);
+        this.photos = [];
       }
     },
 

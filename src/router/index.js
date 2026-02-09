@@ -53,6 +53,11 @@ const router = createRouter({
       path: '/road-problems/:id/historique',
       name: 'SignalementHistorique',
       component: () => import('../views/SignalementHistoriqueView.vue')
+    },
+    {
+      path: '/signalements/:id/photos',
+      name: 'SignalementPhotos',
+      component: () => import('../views/SignalementPhotoView.vue')
     }
   ],
 })
