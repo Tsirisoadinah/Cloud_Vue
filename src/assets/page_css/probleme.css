@@ -115,10 +115,39 @@
   pointer-events: auto; /* IMPORTANT : permet l'interaction */
 }
 
-.tooltip-close {
+.tooltip-header {
+  position: relative;
+  padding-right: 110px;
+}
+
+.tooltip-actions {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 6px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.photos-link {
+  font-size: 12px;
+  color: #1e88e5;
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.photos-link:hover {
+  background: #bbdefb;
+  border-color: #1e88e5;
+  text-decoration: none;
+}
+
+.tooltip-close {
   font-size: 24px;
   font-weight: bold;
   color: #999;

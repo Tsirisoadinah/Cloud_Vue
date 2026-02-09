@@ -21,3 +21,7 @@ export async function getRouteProblemeDashboard() {
   const res = await api.get('/api/data/routeprobleme/dashboard');
   return res.data.data;
 }
+
+export function getPhotosBySignalement(id) {
+  return api.get(`/signalements/${id}/photos`);
+}

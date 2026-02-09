@@ -29,7 +29,15 @@
     >
       <div class="tooltip-header">
         <h3>Signalement #{{ hoveredProblem.id }}</h3>
-        <div class="tooltip-close" @click="closeTooltip">×</div>
+        <div class="tooltip-actions">
+          <RouterLink
+            class="photos-link"
+            :to="`/signalements/${hoveredProblem.id}/photos`"
+          >
+            Voir les photos
+          </RouterLink>
+          <div class="tooltip-close" @click="closeTooltip">×</div>
+        </div>
       </div>
 
       <div class="tooltip-body">
