@@ -17,6 +17,18 @@
     </div>
 
     <div v-else class="card">
+      <div class="current-box">
+        <div class="current-label">Prix forfaitaire actuel</div>
+        <div v-if="isLoadingCurrent" class="current-value muted">Chargement...</div>
+        <div v-else class="current-value">
+          <span v-if="currentMontant !== null">{{ formatCurrency(currentMontant) }}</span>
+          <span v-else class="muted">Non défini</span>
+        </div>
+        <button class="btn-secondary" type="button" @click="loadCurrent" :disabled="isLoadingCurrent">
+          Rafraîchir
+        </button>
+      </div>
+
       <form @submit.prevent="onSubmit" class="form">
         <div class="form-group">
           <label class="form-label">Forfait par m2</label>
@@ -45,15 +57,17 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { isAdmin, isAuthenticated } from '@/services/authService'
-import { updatePrixForfaitaire } from '@/services/prixForfaitaireService'
+import { getPrixForfaitaire, updatePrixForfaitaire } from '@/services/prixForfaitaireService'
 
 const montant = ref('')
 const isSaving = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+const currentMontant = ref(null)
+const isLoadingCurrent = ref(false)
 
 const hasToken = computed(() => isAuthenticated())
 const isUserAdmin = computed(() => isAdmin())
@@ -68,6 +82,40 @@ function normalizeApiResponse(resData) {
     }
   }
   return resData
+}
+
+function formatCurrency(value) {
+  const numberValue = Number(value)
+  if (Number.isNaN(numberValue)) return String(value)
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'MGA',
+    maximumFractionDigits: 2,
+  }).format(numberValue)
+}
+
+const loadCurrent = async () => {
+  errorMessage.value = ''
+  successMessage.value = ''
+
+  if (!hasToken.value || !isUserAdmin.value) {
+    currentMontant.value = null
+    return
+  }
+
+  try {
+    isLoadingCurrent.value = true
+    const res = await getPrixForfaitaire()
+    const payload = normalizeApiResponse(res.data)
+    const montantValue = payload?.data?.montant
+    currentMontant.value = montantValue ?? null
+  } catch (err) {
+    currentMontant.value = null
+    const msg = err?.response?.data?.message || err?.message || 'Erreur lors du chargement du prix forfaitaire'
+    errorMessage.value = msg
+  } finally {
+    isLoadingCurrent.value = false
+  }
 }
 
 const onSubmit = async () => {
@@ -86,6 +134,7 @@ const onSubmit = async () => {
     const payload = normalizeApiResponse(res.data)
 
     successMessage.value = payload?.message || 'Prix forfaitaire mis à jour avec succès'
+    await loadCurrent()
   } catch (err) {
     const msg = err?.response?.data?.message || err?.message || 'Erreur lors de la mise à jour'
     errorMessage.value = msg
@@ -93,6 +142,10 @@ const onSubmit = async () => {
     isSaving.value = false
   }
 }
+
+onMounted(() => {
+  loadCurrent()
+})
 </script>
 
 <style scoped>
@@ -129,6 +182,50 @@ const onSubmit = async () => {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   padding: 24px;
+}
+
+.current-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  background: #fbfcfe;
+}
+
+.current-label {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.current-value {
+  flex: 1;
+  text-align: center;
+  font-weight: 800;
+  color: #2c3e50;
+}
+
+.muted {
+  font-weight: 600;
+  color: #6c757d;
+}
+
+.btn-secondary {
+  padding: 10px 12px;
+  background: white;
+  border: 1px solid #dee2e6;
+  color: #2c3e50;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-secondary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .form-group {
