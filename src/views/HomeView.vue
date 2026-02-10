@@ -58,7 +58,7 @@
             </RouterLink>
             <RouterLink to="/about" class="btn btn-secondary">
               <i class="fas fa-chart-bar btn-icon"></i>
-              Tableau de Bord
+              Statistiques
             </RouterLink>
           </div>
         </div>
