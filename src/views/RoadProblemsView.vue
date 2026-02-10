@@ -58,6 +58,11 @@
           <span class="info-value">{{ hoveredProblem.surface }} m²</span>
         </div>
 
+        <div class="info-row" v-if="hoveredProblem.budget || calculatedBudget">
+          <span class="info-label">Budget :</span>
+          <span class="info-value">{{ formatBudget(hoveredProblem.budget || calculatedBudget) }}</span>
+        </div>
+
         <hr />
 
         <!-- Section assignation entreprise -->
@@ -74,7 +79,7 @@
             </select>
 
             <label>Niveau (1-10) :</label>
-            <select v-model.number="budget" :disabled="!isHoveredProblemNouveau">
+            <select v-model.number="niveau" :disabled="!isHoveredProblemNouveau">
               <option disabled value="">Choisir un niveau</option>
               <option v-for="level in levelOptions" :key="level" :value="level">
                 {{ level }}
@@ -86,11 +91,15 @@
 
             <button
               class="btn-primary"
-              :disabled="loadingAssignation || !selectedEntreprise || (isHoveredProblemNouveau && !budget)"
+              :disabled="loadingAssignation || !selectedEntreprise || (isHoveredProblemNouveau && !niveau)"
               @click="assigner"
             >
               {{ loadingAssignation ? 'Assignation...' : '✓ Assigner' }}
             </button>
+            <div v-if="calculatedBudget" class="info-row">
+              <span class="info-label">Budget estimé :</span>
+              <span class="info-value">{{ formatBudget(calculatedBudget) }}</span>
+            </div>
           </div>
 
           <!-- <div v-else class="no-permission">
@@ -106,11 +115,11 @@
               <span class="info-label">Entreprise :</span>
               <span class="info-value">{{ hoveredProblem.entrepriseName || 'Non spécifié' }}</span>
             </div>
-
-            <div class="info-row">
-              <span class="info-label">Niveau :</span>
-              <span class="info-value">{{ formatLevel(hoveredProblem.budget) }}</span>
+            <div class="info-row" v-if="hoveredProblem.budget != null">
+              <span class="info-label">Budget :</span>
+              <span class="info-value">{{ formatBudget(hoveredProblem.budget) }}</span>
             </div>
+
           </div>
         </div>
 
@@ -169,6 +178,7 @@ import 'leaflet/dist/leaflet.css'
 import { getSignalements, assignEntreprise, updateSignalementStatus } from "@/services/signalementService";
 import { getEntreprises } from "@/services/entrepriseService";
 import { getStatus } from "@/services/statusService";
+import { getPrix } from "@/services/prixService";
 
 export default {
   name: 'RoadProblemsView',
@@ -184,7 +194,8 @@ export default {
       statusList: [],
       selectedEntreprise: null,
       selectedStatus: null,
-      budget: null,
+      niveau: null,
+      prixForfaitaire: null,
       loadingAssignation: false,
       loadingStatusUpdate: false,
       closeTimeout: null,
@@ -204,6 +215,20 @@ export default {
         return false;
       }
       return this.hoveredProblem.status.toLowerCase() === 'nouveau';
+    },
+    calculatedBudget() {
+      if (!this.hoveredProblem || this.niveau == null || this.prixForfaitaire == null) {
+        return null;
+      }
+
+      const surface = Number(this.hoveredProblem.surface);
+      const prix = Number(this.prixForfaitaire);
+
+      if (Number.isNaN(surface) || Number.isNaN(prix)) {
+        return null;
+      }
+
+      return prix * surface * this.niveau;
     }
   },
 
@@ -215,12 +240,15 @@ export default {
     await this.loadSignalements();
 
 
-    // Charger entreprises et statuts en arrière-plan (optionnels)
+    // Charger entreprises, statuts et prix forfaitaire en arrière-plan (optionnels)
     this.loadEntreprises().catch(() => {
       console.warn('⚠️ Impossible de charger les entreprises (accès restreint)');
     });
     this.loadStatus().catch(() => {
       console.warn('⚠️ Impossible de charger les statuts (accès restreint)');
+    });
+    this.loadPrixForfaitaire().catch(() => {
+      console.warn('⚠️ Impossible de charger le prix forfaitaire');
     });
 
     this.addProblemsToMap();
@@ -309,25 +337,41 @@ export default {
       }
     },
 
+    async loadPrixForfaitaire() {
+      try {
+        const res = await getPrix();
+        this.prixForfaitaire = Number(res?.data?.data?.montant) ?? null;
+      } catch (e) {
+        this.prixForfaitaire = null;
+        console.warn("⚠️ Impossible de charger le prix forfaitaire", e);
+      }
+    },
+
+
     async assigner() {
-      if (!this.selectedEntreprise || (this.isHoveredProblemNouveau && !this.budget)) {
+      if (!this.selectedEntreprise || (this.isHoveredProblemNouveau && !this.niveau)) {
         alert("Entreprise et niveau requis");
+        return;
+      }
+      if (this.isHoveredProblemNouveau && !this.calculatedBudget) {
+        alert("Impossible de calculer le budget");
         return;
       }
 
       try {
         this.loadingAssignation = true;
 
+        const budgetValue = this.calculatedBudget;
         await assignEntreprise(this.hoveredProblem.id, {
           entrepriseId: this.selectedEntreprise,
-          budget: this.budget
+          budget: budgetValue
         });
 
         alert("✓ Signalement assigné avec succès");
 
         // reset
         this.selectedEntreprise = null;
-        this.budget = null;
+        this.niveau = null;
 
         // Recharger les données
         await this.loadSignalements();
@@ -481,7 +525,7 @@ export default {
     closeTooltip() {
       this.hoveredProblem = null;
       this.selectedEntreprise = null;
-      this.budget = null;
+      this.niveau = null;
       this.tooltipLocked = false;
       if (this.closeTimeout) {
         clearTimeout(this.closeTimeout);
@@ -524,9 +568,9 @@ export default {
       this.tooltipPosition = { x, y };
     },
 
-    formatLevel(level) {
-      if (!level) return '0';
-      return new Intl.NumberFormat('fr-FR').format(level);
+    formatBudget(value) {
+      if (!value) return '0';
+      return new Intl.NumberFormat('fr-FR').format(value);
     }
   }
 }
