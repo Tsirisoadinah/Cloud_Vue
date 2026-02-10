@@ -17,7 +17,7 @@
             <i class="fas fa-map-marker-alt link-icon"></i>
             Carte
           </RouterLink>
-          <RouterLink v-if="isUserAdmin" to="/dashboard" class="nav-link">
+          <RouterLink v-if="isUserAdmin" to="/about" class="nav-link">
             <i class="fas fa-chart-bar link-icon"></i>
             statistiques
           </RouterLink>
