@@ -147,7 +147,7 @@
             <label>Nouveau statut :</label>
             <select v-model="selectedStatus">
               <option disabled value="">Sélectionner un statut</option>
-              <option v-for="status in statusList" :key="status.id" :value="status.id">
+              <option v-for="status in allowedStatusOptions" :key="status.id" :value="status.id">
                 {{ status.label }}
               </option>
             </select>
@@ -229,6 +229,24 @@ export default {
       }
 
       return prix * surface * this.niveau;
+    },
+    currentStatusValue() {
+      if (!this.hoveredProblem?.status || !this.statusList?.length) {
+        return null;
+      }
+      const currentLabel = String(this.hoveredProblem.status).trim().toLowerCase();
+      const match = this.statusList.find(status => {
+        const label = String(status.label || '').trim().toLowerCase();
+        return label === currentLabel;
+      });
+      return match?.valeur ?? null;
+    },
+    allowedStatusOptions() {
+      const currentValue = this.currentStatusValue;
+      if (currentValue == null) {
+        return this.statusList;
+      }
+      return this.statusList.filter(status => (status?.valeur ?? 0) >= currentValue);
     }
   },
 
