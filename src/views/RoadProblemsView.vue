@@ -392,7 +392,8 @@ export default {
         const budgetValue = this.calculatedBudget;
         await assignEntreprise(this.hoveredProblem.id, {
           entrepriseId: this.selectedEntreprise,
-          budget: budgetValue
+          budget: budgetValue,
+          niveau: this.niveau
         });
 
         alert("✓ Signalement assigné avec succès");
