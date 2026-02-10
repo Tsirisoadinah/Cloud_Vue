@@ -105,6 +105,65 @@
         </div>
       </div>
 
+
+            <!-- Section détaillée des signalements -->
+      <div class="signalements-detail">
+        <h2>
+          <i class="fas fa-list-alt"></i>
+          Détails des Signalements
+        </h2>
+
+        <!-- Boutons de filtrage par statut -->
+        <div class="status-buttons">
+          <button
+            v-for="status in statusButtons"
+            :key="status.key"
+            :class="['status-btn', { active: selectedStatus === status.key }]"
+            @click="selectStatus(status.key)"
+          >
+            {{ status.label }}
+          </button>
+        </div>
+
+        <!-- Tableau des signalements -->
+        <div class="table-container">
+          <table class="signalements-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Surface (m²)</th>
+                <th>Budget</th>
+                <th>Statut</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="signalement in filteredSignalements"
+                :key="signalement.id"
+              >
+                <td>#{{ signalement.id }}</td>
+                <td>{{ signalement.description }}</td>
+                <td>{{ signalement.surface }}</td>
+                <td>{{ formatCurrency(signalement.budget) }}</td>
+                <td>
+                  <span class="status-badge" :class="signalement.statusKey">
+                    {{ signalement.statusLabel }}
+                  </span>
+                </td>
+                <td>{{ signalement.date }}</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div v-if="filteredSignalements.length === 0" class="no-data">
+            Aucun signalement trouvé pour ce statut
+          </div>
+        </div>
+      </div>
+
+
       <!-- Répartition par statut -->
       <div class="status-breakdown">
         <h2>
@@ -177,62 +236,6 @@
         </div>
       </div>
 
-      <!-- Section détaillée des signalements -->
-      <div class="signalements-detail">
-        <h2>
-          <i class="fas fa-list-alt"></i>
-          Détails des Signalements
-        </h2>
-
-        <!-- Boutons de filtrage par statut -->
-        <div class="status-buttons">
-          <button
-            v-for="status in statusButtons"
-            :key="status.key"
-            :class="['status-btn', { active: selectedStatus === status.key }]"
-            @click="selectStatus(status.key)"
-          >
-            {{ status.label }}
-          </button>
-        </div>
-
-        <!-- Tableau des signalements -->
-        <div class="table-container">
-          <table class="signalements-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Description</th>
-                <th>Surface (m²)</th>
-                <th>Budget</th>
-                <th>Statut</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="signalement in filteredSignalements"
-                :key="signalement.id"
-              >
-                <td>#{{ signalement.id }}</td>
-                <td>{{ signalement.description }}</td>
-                <td>{{ signalement.surface }}</td>
-                <td>{{ formatCurrency(signalement.budget) }}</td>
-                <td>
-                  <span class="status-badge" :class="signalement.statusKey">
-                    {{ signalement.statusLabel }}
-                  </span>
-                </td>
-                <td>{{ signalement.date }}</td>
-              </tr>
-            </tbody>
-          </table>
-
-          <div v-if="filteredSignalements.length === 0" class="no-data">
-            Aucun signalement trouvé pour ce statut
-          </div>
-        </div>
-      </div>
 
       <!-- Informations supplémentaires -->
       <div class="additional-info">
