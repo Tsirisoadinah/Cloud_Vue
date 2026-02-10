@@ -21,6 +21,10 @@
             <i class="fas fa-chart-bar link-icon"></i>
             statistiques
           </RouterLink>
+          <RouterLink v-if="isUserAdmin" to="/config" class="nav-link">
+            <i class="fas fa-cog link-icon"></i>
+            config
+          </RouterLink>
           <div class="nav-divider"></div>
           <RouterLink v-if="!isUserAuthenticated" to="/login" class="nav-link auth-link">
             <i class="fas fa-sign-in-alt link-icon"></i>
