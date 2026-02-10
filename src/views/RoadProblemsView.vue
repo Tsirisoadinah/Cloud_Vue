@@ -115,6 +115,10 @@
               <span class="info-label">Entreprise :</span>
               <span class="info-value">{{ hoveredProblem.entrepriseName || 'Non spécifié' }}</span>
             </div>
+            <div class="info-row">
+              <span class="info-label">Niveau :</span>
+              <span class="info-value">{{ hoveredProblem.niveau ?? '—' }}</span>
+            </div>
             <div class="info-row" v-if="hoveredProblem.budget != null">
               <span class="info-label">Budget :</span>
               <span class="info-value">{{ formatBudget(hoveredProblem.budget) }}</span>
@@ -311,6 +315,7 @@ export default {
             status: s.routeStatusName,
             description: s.problemeDescription,
             surface: s.surface,
+            niveau: s.niveau,
             entrepriseId: s.routeEntrepriseId,
             entrepriseName: s.routeEntrepriseName,
             budget: s.budget
