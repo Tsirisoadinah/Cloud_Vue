@@ -94,12 +94,12 @@
         <div class="stats-grid">
           <div class="stats-card">
             <h3>Traitement des travaux</h3>
-            <div class="stat-value">{{ totalTraitementHeures }}h</div>
+            <div class="stat-value">{{ totalTraitementHeures }} min</div>
             <div class="stat-label">Total des traitements</div>
           </div>
           <div class="stats-card">
             <h3>Traitement moyenne vers l'étape suivante</h3>
-            <div class="stat-value">{{ moyenneTraitementHeures }}h</div>
+            <div class="stat-value">{{ moyenneTraitementHeures }} min</div>
             <div class="stat-label">Temps moyen de transition</div>
           </div>
         </div>
@@ -365,9 +365,8 @@ export default {
     },
 
     formatHours(minutes) {
-      if (!minutes || Number.isNaN(Number(minutes))) return '0'
-      const hours = Number(minutes) / 60
-      return hours.toFixed(1)
+      if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) return '0'
+      return Number(minutes).toFixed(1)
     },
 
     selectStatus(statusKey) {
@@ -396,6 +395,15 @@ export default {
 
     moyenneTraitementHeures() {
       const stats = this.dashboard?.statistiques || []
+
+      if (this.selectedStatus && this.selectedStatus !== 'tous') {
+        const selected = stats.find(s => {
+          const label = s?.status?.label
+          return this.normalizeStatus(label) === this.selectedStatus
+        })
+        return this.formatHours(selected?.delaisMoyen)
+      }
+
       const values = stats.map(s => s.delaisMoyen).filter(v => v !== null && v !== undefined)
       if (values.length === 0) return '0'
       const avg = values.reduce((sum, v) => sum + v, 0) / values.length

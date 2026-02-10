@@ -71,7 +71,7 @@
             <h4>Assignation</h4>
 
             <label>Entreprise :</label>
-            <select v-model="selectedEntreprise">
+            <select v-model="selectedEntreprise" :disabled="!isHoveredProblemNouveau">
               <option disabled value="">Choisir une entreprise</option>
               <option v-for="e in entreprises" :key="e.id" :value="e.id">
                 {{ e.label }}
@@ -86,12 +86,12 @@
               </option>
             </select>
             <small v-if="!isHoveredProblemNouveau">
-              Le niveau est modifiable uniquement quand le statut est "nouveau".
+              Assignation entreprise + niveau possible uniquement quand le statut est "nouveau".
             </small>
 
             <button
               class="btn-primary"
-              :disabled="loadingAssignation || !selectedEntreprise || (isHoveredProblemNouveau && !niveau)"
+              :disabled="loadingAssignation || !isHoveredProblemNouveau || !selectedEntreprise || !niveau"
               @click="assigner"
             >
               {{ loadingAssignation ? 'Assignation...' : '✓ Assigner' }}
@@ -367,7 +367,12 @@ export default {
 
 
     async assigner() {
-      if (!this.selectedEntreprise || (this.isHoveredProblemNouveau && !this.niveau)) {
+      if (!this.isHoveredProblemNouveau) {
+        alert('Assignation possible uniquement quand le statut est "nouveau"');
+        return;
+      }
+
+      if (!this.selectedEntreprise || !this.niveau) {
         alert("Entreprise et niveau requis");
         return;
       }
