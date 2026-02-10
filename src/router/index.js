@@ -58,6 +58,11 @@ const router = createRouter({
       path: '/signalements/:id/photos',
       name: 'SignalementPhotos',
       component: () => import('../views/SignalementPhotoView.vue')
+    },
+    {
+      path: '/config',
+      name: 'config',
+      component: () => import('../views/ConfigView.vue'),
     }
   ],
 })

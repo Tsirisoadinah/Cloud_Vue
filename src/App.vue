@@ -17,16 +17,20 @@
             <i class="fas fa-map-marker-alt link-icon"></i>
             Carte
           </RouterLink>
-          <RouterLink to="/about" class="nav-link">
+          <RouterLink v-if="isUserAuthenticated" to="/about" class="nav-link">
             <i class="fas fa-chart-bar link-icon"></i>
             statistiques
+          </RouterLink>
+          <RouterLink v-if="isUserAdmin" to="/config" class="nav-link">
+            <i class="fas fa-cog link-icon"></i>
+            config
           </RouterLink>
           <div class="nav-divider"></div>
           <RouterLink v-if="!isUserAuthenticated" to="/login" class="nav-link auth-link">
             <i class="fas fa-sign-in-alt link-icon"></i>
             Connexion
           </RouterLink>
-          <a v-if="isUserAdmin" @click.prevent="showLogoutConfirmation" class="nav-link auth-link logout-link">
+          <a v-if="isUserAuthenticated" @click.prevent="showLogoutConfirmation" class="nav-link auth-link logout-link">
             <i class="fas fa-sign-out-alt link-icon"></i>
             Déconnexion
           </a>

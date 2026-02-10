@@ -1,8 +1,20 @@
 import api from "./api";
 
+function unwrapApiResponse(resData) {
+  if (typeof resData === 'string') {
+    try {
+      return JSON.parse(resData)
+    } catch {
+      return null
+    }
+  }
+  return resData
+}
+
 export async function getSignalements() {
   const res = await api.get("/signalements");
-  return res.data.data; // tableau backend
+  const payload = unwrapApiResponse(res.data)
+  return payload?.data || []
 }
 
 export function assignEntreprise(id, data) {
@@ -18,8 +30,10 @@ export function getHistoriqueStatus(id, params = {}) {
 }
 
 export async function getRouteProblemeDashboard() {
+  // Must use this endpoint (permitAll) for dashboard stats
   const res = await api.get('/api/data/routeprobleme/dashboard');
-  return res.data.data;
+  const payload = unwrapApiResponse(res.data)
+  return payload?.data || null
 }
 
 export function getPhotosBySignalement(id) {
