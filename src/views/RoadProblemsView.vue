@@ -73,16 +73,20 @@
               </option>
             </select>
 
-            <label>Budget (MGA) :</label>
-            <input
-              type="number"
-              v-model="budget"
-              placeholder="Entrez le budget"
-            />
+            <label>Niveau (1-10) :</label>
+            <select v-model.number="budget" :disabled="!isHoveredProblemNouveau">
+              <option disabled value="">Choisir un niveau</option>
+              <option v-for="level in levelOptions" :key="level" :value="level">
+                {{ level }}
+              </option>
+            </select>
+            <small v-if="!isHoveredProblemNouveau">
+              Le niveau est modifiable uniquement quand le statut est "nouveau".
+            </small>
 
             <button
               class="btn-primary"
-              :disabled="loadingAssignation || !selectedEntreprise || !budget"
+              :disabled="loadingAssignation || !selectedEntreprise || (isHoveredProblemNouveau && !budget)"
               @click="assigner"
             >
               {{ loadingAssignation ? 'Assignation...' : '✓ Assigner' }}
@@ -104,8 +108,8 @@
             </div>
 
             <div class="info-row">
-              <span class="info-label">Budget :</span>
-              <span class="info-value">{{ formatBudget(hoveredProblem.budget) }} MGA</span>
+              <span class="info-label">Niveau :</span>
+              <span class="info-value">{{ formatLevel(hoveredProblem.budget) }}</span>
             </div>
           </div>
         </div>
@@ -188,6 +192,18 @@ export default {
       userRole: null,
       showStatusModal: false,
       photos: []
+    }
+  },
+
+  computed: {
+    levelOptions() {
+      return Array.from({ length: 10 }, (_, index) => index + 1);
+    },
+    isHoveredProblemNouveau() {
+      if (!this.hoveredProblem || !this.hoveredProblem.status) {
+        return false;
+      }
+      return this.hoveredProblem.status.toLowerCase() === 'nouveau';
     }
   },
 
@@ -294,8 +310,8 @@ export default {
     },
 
     async assigner() {
-      if (!this.selectedEntreprise || !this.budget) {
-        alert("Entreprise et budget requis");
+      if (!this.selectedEntreprise || (this.isHoveredProblemNouveau && !this.budget)) {
+        alert("Entreprise et niveau requis");
         return;
       }
 
@@ -508,9 +524,9 @@ export default {
       this.tooltipPosition = { x, y };
     },
 
-    formatBudget(budget) {
-      if (!budget) return '0';
-      return new Intl.NumberFormat('fr-FR').format(budget);
+    formatLevel(level) {
+      if (!level) return '0';
+      return new Intl.NumberFormat('fr-FR').format(level);
     }
   }
 }
