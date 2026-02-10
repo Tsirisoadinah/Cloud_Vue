@@ -12,13 +12,13 @@
       <div class="left-panel">
         <div class="stats-card">
           <h3>Traitement des travaux</h3>
-          <div class="stat-value">{{ totalTraitementHeures }} min</div>
+          <div class="stat-value">{{ totalTraitementHeures }}</div>
           <div class="stat-label">Total des traitements</div>
         </div>
 
         <div class="stats-card">
           <h3>Traitement moyenne vers l'étape suivante</h3>
-          <div class="stat-value">{{ moyenneTraitementHeures }} min</div>
+          <div class="stat-value">{{ moyenneTraitementHeures }}</div>
           <div class="stat-label">Temps moyen de transition</div>
         </div>
       </div>
@@ -179,8 +179,17 @@ export default {
     },
 
     formatHours(minutes) {
-      if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) return '0'
-      return Number(minutes).toFixed(1)
+      if (minutes === null || minutes === undefined || Number.isNaN(Number(minutes))) {
+        return '00:00:00'
+      }
+
+      const totalSeconds = Math.max(0, Math.round(Number(minutes) * 60))
+      const hours = Math.floor(totalSeconds / 3600)
+      const minutesPart = Math.floor((totalSeconds % 3600) / 60)
+      const secondsPart = totalSeconds % 60
+
+      const pad2 = (n) => String(n).padStart(2, '0')
+      return `${pad2(hours)}:${pad2(minutesPart)}:${pad2(secondsPart)}`
     },
 
     selectStatus(statusKey) {
